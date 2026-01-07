@@ -1,205 +1,180 @@
-
-.logo-img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.logo-big-img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-/* Sisanya tetap sama */
+/* Background image + overlay (add public/login-bg.jpg for exact look) */
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  width: 100%;
+  position: relative;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  background: #111;
 }
 
-.login-page-header {
-  padding: 20px 40px;
-  background: rgba(0, 0, 0, 0.2);
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Use image from src/assets to avoid depending on public */
+  background: url('../assets/telkom-bg.jpg') center/cover no-repeat;
+  opacity: 1;
 }
 
-.logo-header {
+.login-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Header */
+.login-header {
+  position: relative;
+  z-index: 1;
+  padding: 20px 32px;
+}
+
+.login-header-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: white;
-  font-size: 16px;
-}
-
-.login-content-wrapper {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 40px;
-  gap: 60px;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.login-left-section {
-  flex: 1;
-  color: white;
-  padding: 20px;
-}
-
-.main-heading {
-  font-size: 56px;
-  font-weight: bold;
-  line-height: 1.1;
-  margin-bottom: 60px;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-}
-
-.brand-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-
-.brand-info h2 {
-  font-size: 36px;
-  margin: 0;
-  line-height: 1;
-}
-
-.brand-info p {
-  font-size: 18px;
-  margin: 5px 0 0 0;
-  opacity: 0.9;
-}
-
-.tagline {
-  font-size: 16px;
-  font-style: italic;
-  margin-left: 100px;
-  opacity: 0.8;
-}
-
-/* Login Card styling tetap sama */
-.login-right-section {
-  flex: 0 0 420px;
-}
-
-.login-card {
-  background: linear-gradient(135deg, #e30613 0%, #b50510 100%);
-  padding: 50px 40px;
-  border-radius: 15px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-}
-
-.login-card h2 {
-  color: white;
-  font-size: 36px;
-  font-weight: bold;
-  text-align: center;
-  margin: 0 0 35px 0;
-}
-
-.login-card form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.login-card input {
-  width: 100%;
-  padding: 15px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  background: white;
-  color: #333;
-  box-sizing: border-box;
-}
-
-.login-card input::placeholder {
-  color: #999;
-}
-
-.login-card input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
-}
-
-.register-info {
-  text-align: center;
-  color: white;
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.register-info a {
-  color: #ffd700;
-  text-decoration: none;
+  color: #fff;
   font-weight: 600;
 }
 
-.register-info a:hover {
+.login-header-text {
+  font-size: 22px;
+}
+
+/* Main two-column layout */
+.login-main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 540px;
+  align-items: center;
+  gap: 40px;
+  padding: 0 48px 48px 48px;
+}
+
+.login-hero-title {
+  color: #fff;
+  font-size: 84px;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 3px 14px rgba(0,0,0,0.6);
+}
+
+/* Red translucent card */
+.login-panel {
+}
+
+.login-card {
+  background: rgba(171, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+  padding: 38px 34px;
+  border-radius: 28px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+}
+
+.login-card-title {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 22px 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-label {
+  color: #fff;
+  font-size: 18px;
+  margin: 10px 10px 8px 10px;
+}
+
+.login-input {
+  width: 100%;
+  height: 54px;
+  border-radius: 999px; /* pill */
+  border: none;
+  padding: 0 22px;
+  background: rgba(255, 255, 255, 0.2); /* transparent */
+  color: #fff;
+  font-size: 16px;
+}
+
+.login-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.login-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.25);
+}
+
+.login-register {
+  color: #fff;
+  font-size: 16px;
+  margin: 18px 10px 0 10px;
+}
+
+.login-register-link {
+  color: #2b6cb0;
   text-decoration: underline;
 }
 
-.login-card button {
-  width: 100%;
-  padding: 15px;
-  background: white;
-  color: #e30613;
-  border: none;
+.login-error {
+  color: #ffe6e6;
+  background: rgba(0,0,0,0.15);
   border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 10px;
+  padding: 10px 12px;
+  margin: 12px 10px 0 10px;
 }
 
-.login-card button:hover {
-  background: #f8f8f8;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.login-submit {
+  margin: 16px 10px 0 10px;
+  height: 48px;
+  border-radius: 999px;
+  border: none;
+  background: #ffffff;
+  color: #ab0000;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .login-content-wrapper {
-    flex-direction: column;
-    gap: 40px;
-    padding: 30px 20px;
+@media (max-width: 1080px) {
+  .login-main {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
 
-  .main-heading {
-    font-size: 42px;
-    margin-bottom: 40px;
-    text-align: center;
-  }
-
-  .login-left-section {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .brand-section {
-    justify-content: center;
-  }
-
-  .tagline {
-    margin-left: 0;
-  }
-
-  .login-right-section {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 420px;
+  .login-hero-title {
+    font-size: 52px;
+    text-align: left;
   }
 }

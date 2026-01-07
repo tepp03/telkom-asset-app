@@ -1,110 +1,126 @@
-.laporan-container {
+.laporan-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background: #f2f2f2;
+  padding-bottom: 40px;
 }
 
-.laporan-content {
-  padding: 40px;
-  width: 100%;
-  max-width: 100%; /* Hilangkan batasan lebar */
+.laporan-wrap {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.search-bar {
-  margin-bottom: 30px;
-  width: 100%;
-  max-width: 600px; /* Search bar tidak perlu terlalu lebar */
+.laporan-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-.search-bar input {
-  width: 100%;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  background-color: #555;
-  color: #ccc;
+.laporan-search input {
+  width: 600px;
+  max-width: 90vw;
+  padding: 16px 52px 16px 18px;
+  border-radius: 32px;
+  border: none;
+  background: #d30000;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.search-bar input::placeholder {
-  color: #999;
+.laporan-search input::placeholder {
+  color: #ffe6e6;
 }
 
-.reports-grid {
+.search-icon {
+  position: absolute;
+  right: calc(50% - 300px + 16px);
+  color: #fff;
+  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.laporan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Lebih fleksibel */
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px;
-  width: 100%;
+  padding: 0 12px;
 }
 
-.report-card {
-  background: white;
-  padding: 30px 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  text-align: center;
-  text-decoration: none;
-  transition: transform 0.3s;
+.laporan-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px;
+}
+
+.arrow-btn {
+  background: none;
+  border: none;
+  color: #c10000;
+  font-size: 42px;
+  cursor: pointer;
+  padding: 8px;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.arrow-btn:hover:not(:disabled) {
+  color: #d30000;
+  transform: scale(1.1);
+}
+
+.arrow-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.arrow-btn:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.laporan-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.laporan-card {
+  background: #f7f7f7;
+  border-radius: 18px;
+  border: 8px solid #f7f7f7;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 120px;
+  gap: 10px;
+  padding: 12px;
 }
 
-.report-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+.laporan-img {
+  width: 170px;
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 18px;
 }
 
-.report-id {
-  color: #333;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 15px;
+.laporan-title {
+  color: #555;
+  font-size: 22px;
+  font-weight: 700;
 }
 
-.report-status {
-  padding: 8px 16px;
-  border-radius: 5px;
-  font-size: 13px;
-  color: white;
-  font-weight: 500;
-  width: 100%;
-  max-width: 150px;
+@media (max-width: 1200px) {
+  .laporan-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-.status-selesai {
-  background-color: #28a745;
-}
-
-.status-dalam-proses {
-  background-color: #ffc107;
-  color: #333;
-}
-
-.status-pending {
-  background-color: #6c757d;
-}
-
-/* Responsive Design */
-@media (max-width: 1400px) {
-  .reports-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .laporan-content {
-    padding: 20px;
-  }
-  
-  .reports-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-  }
-  
-  .report-card {
-    padding: 20px 15px;
-    min-height: 100px;
-  }
+@media (max-width: 800px) {
+  .laporan-grid { grid-template-columns: repeat(2, 1fr); }
 }

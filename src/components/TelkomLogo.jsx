@@ -1,4 +1,4 @@
-import telkomLogo from '../assets/telkom-logo.jpg';
+import telkomLogo from '../assets/telkom-logo.png';
 import './TelkomLogo.css';
 
 function TelkomLogo({ size = 'medium' }) {

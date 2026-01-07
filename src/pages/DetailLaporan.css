@@ -1,54 +1,114 @@
-.detail-container {
+/* Detail page styled like screenshot */
+.detail-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  position: relative;
 }
 
-.detail-content {
-  padding: 40px;
-  max-width: 800px;
-  margin: 0 auto;
+.detail-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(199,0,0,0.85), rgba(199,0,0,0.85)), url('../assets/telkom-bg.jpg') center/cover no-repeat;
 }
 
-.detail-content h2 {
-  color: #333;
-  margin-bottom: 30px;
+.detail-main {
+  position: relative;
+  z-index: 1;
+  padding: 24px 36px 200px 36px; /* increased bottom space so content doesn't collide with fixed buttons */
 }
 
-.detail-box {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.detail-title {
+  color: #fff;
+  font-size: 56px;
+  font-weight: 800;
+  margin: 14px 0 24px 0;
 }
 
-.detail-row {
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  gap: 36px;
+  align-items: start;
+}
+
+.detail-left {
+  color: #fff;
+  font-size: 28px;
+  line-height: 1.4;
+}
+
+.detail-line { margin: 14px 0; }
+
+.detail-actions {
   display: flex;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #eee;
+  gap: 16px;
+  margin-top: 18px;
 }
 
-.detail-row:last-of-type {
-  border-bottom: none;
+.btn-accept, .btn-decline {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.label {
-  font-weight: 600;
-  color: #333;
-  min-width: 180px;
+.btn-accept { background: #1f9956; color: #fff; }
+.btn-decline {
+  background: #e00000; /* merah terang agar kontras */
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.9); /* garis putih untuk kontras terhadap background merah */
+  box-shadow: 0 6px 14px rgba(0,0,0,0.28);
 }
 
-.value {
-  color: #666;
-  flex: 1;
+.btn-decline:hover {
+  background: #b00000;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 30px;
+.detail-right { display: flex; justify-content: center; }
+
+.detail-photo-frame {
+  background: #fff;
+  padding: 18px;
+  border-radius: 32px;
+  margin-bottom: 120px; /* extra spacing from bottom UI to clear fixed buttons */
 }
 
-.action-buttons .btn {
-  flex: 1;
+.detail-photo-frame img {
+  display: block;
+  width: 450px;
+  height: 520px;
+  object-fit: cover;
+  border-radius: 22px;
+}
+
+.btn-back {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 5; /* ensure above content */
+}
+
+.btn-next {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 5; /* ensure above content */
 }
