@@ -4,17 +4,33 @@ import { useState, useEffect, useRef } from 'react';
 import ConfirmModal from './ConfirmModal';
 import logoTelkom from '../assets/telkom-logo2.png';
 
+
 function Navbar({ searchTerm, onSearchChange }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [roleLabel, setRoleLabel] = useState('Admin 1');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileDropdownRef = useRef(null);
+
+  useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.json())
+    .then((data) => {
+      const role = data?.user?.role;
+      setRoleLabel(role === 'teknisi' ? 'Teknisi' : 'Admin 1');
+    })
+    .catch(() => {});
+}, []);
 
   const handleLogout = () => {
     setShowLogoutModal(true);
   };
 
+  
   const confirmLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
@@ -67,7 +83,7 @@ function Navbar({ searchTerm, onSearchChange }) {
       
       <div className="navbar-right">
         <div className="admin-info">
-          <span className="admin-label">Admin 1</span>
+          <span className="admin-label">{roleLabel}</span>
           <div className="profile-dropdown" ref={profileDropdownRef}>
             <button 
               className="admin-pill" 

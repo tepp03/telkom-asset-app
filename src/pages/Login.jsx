@@ -10,6 +10,18 @@ function Login({ setAuth }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+
+  const fillAdmin = () => {
+  setUsername('admin');
+  setPassword('admin123');
+};
+
+const fillTeknisi = () => {
+  setUsername('teknisi');
+  setPassword('teknisi123');
+};
+
+
   return (
     <div className="login-page">
       {/* Top header with logo + title */}
@@ -91,7 +103,7 @@ function Login({ setAuth }) {
               <button type="submit" className="login-submit" disabled={loading}>
                 {loading ? 'Memproses…' : 'Masuk'}
               </button>
-            </form>
+            </form> 
           </div>
         </div>
       </div>

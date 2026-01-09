@@ -59,12 +59,27 @@ async function init() {
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  await run(db, `CREATE TABLE IF NOT EXISTS teknisi (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL
+)`);
+
+
   const existing = await get(db, 'SELECT COUNT(1) as c FROM admins');
   if (!existing || existing.c === 0) {
     const passwordHash = bcrypt.hashSync('admin123', 10);
     await run(db, 'INSERT INTO admins (username, password_hash) VALUES (?, ?)', ['admin', passwordHash]);
     console.log('Seeded admin user: username="admin" password="admin123"');
   }
+
+  const existingTeknisi = await get(db, 'SELECT COUNT(1) as c FROM teknisi');
+   if (!existingTeknisi || existingTeknisi.c === 0) {
+    const passwordHash = bcrypt.hashSync('teknisi123', 10);
+    await run(db, 'INSERT INTO teknisi (username, password_hash) VALUES (?, ?)', ['teknisi', passwordHash]);
+    console.log('Seeded teknisi user: username="teknisi" password="teknisi123"');
+}
+
 
   const countReports = await get(db, 'SELECT COUNT(1) as c FROM reports');
   if (!countReports || countReports.c === 0) {
@@ -126,9 +141,16 @@ async function getAdminByUsername(username) {
   return await get(db, 'SELECT * FROM admins WHERE username = ?', [username]);
 }
 
+async function getTeknisiByUsername(username) {
+  const db = openDb();
+  return await get(db, 'SELECT * FROM teknisi WHERE username = ?', [username]);
+}
+  
+
 module.exports = {
   init,
   getAdminByUsername,
+  getTeknisiByUsername,
   // helpers for reports
   listReports: () => {
     const db = openDb();

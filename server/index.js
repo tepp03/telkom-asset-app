@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { 
   init, 
   getAdminByUsername, 
+  getTeknisiByUsername,
   listReports, 
   getReportById, 
   deleteReport, 
@@ -32,17 +33,31 @@ app.post('/api/login', async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password required' });
     }
+
+
     const admin = await getAdminByUsername(username);
-    if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
-    const match = bcrypt.compareSync(password, admin.password_hash);
-    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ sub: username, role: 'admin' }, JWT_SECRET, { expiresIn: '2h' });
-    res.json({ token });
+    if (admin) {
+      const match = bcrypt.compareSync(password, admin.password_hash);
+      if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+      const token = jwt.sign({ sub: username, role: 'admin' }, JWT_SECRET, { expiresIn: '2h' });
+      return res.json({ token });
+    }
+
+    const teknisi = await getTeknisiByUsername(username);
+    if (teknisi) {
+      const match = bcrypt.compareSync(password, teknisi.password_hash);
+      if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+      const token = jwt.sign({ sub: username, role: 'teknisi' }, JWT_SECRET, { expiresIn: '2h' });
+      return res.json({ token });
+    }
+
+    return res.status(401).json({ error: 'Invalid credentials' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // Example protected route (optional)
 app.get('/api/me', (req, res) => {
