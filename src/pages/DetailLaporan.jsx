@@ -33,7 +33,14 @@ function DetailLaporan() {
   const [report, setReport] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', action: null });
   const [imageModal, setImageModal] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [allIds, setAllIds] = useState([]);
+  const [allReports, setAllReports] = useState([]);
+  const [similarReports, setSimilarReports] = useState([]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [report]);
 
   useEffect(() => {
     (async () => {
@@ -54,6 +61,7 @@ function DetailLaporan() {
         const res = await fetch('/api/reports');
         const data = await res.json();
         if (Array.isArray(data)) {
+          setAllReports(data);
           const ids = data.map(r => r.id).sort();
           setAllIds(ids);
         }
@@ -62,6 +70,16 @@ function DetailLaporan() {
       }
     })();
   }, []);
+
+  // Filter similar reports by unit
+  useEffect(() => {
+    if (report && allReports.length > 0) {
+      const similar = allReports.filter(
+        r => r.unit === report.unit && r.id !== report.id
+      );
+      setSimilarReports(similar);
+    }
+  }, [report, allReports]);
 
   const currentIndex = allIds.indexOf(id);
   const nextId = currentIndex >= 0 && currentIndex < allIds.length - 1 ? allIds[currentIndex + 1] : null;
@@ -96,6 +114,35 @@ function DetailLaporan() {
     });
   };
 
+  const baseImages = [report?.image_url, report?.image_url2, report?.image_url3].filter(Boolean);
+  const imageSources = (() => {
+    if (baseImages.length === 0) {
+      return [
+        'https://placehold.co/300x300?text=Foto+1',
+        'https://placehold.co/300x300?text=Foto+2',
+        'https://placehold.co/300x300?text=Foto+3'
+      ];
+    }
+    const filled = [...baseImages];
+    while (filled.length < 3) {
+      const dummyImages = [
+        'https://placehold.co/300x300?text=Foto+1',
+        'https://placehold.co/300x300?text=Foto+2',
+        'https://placehold.co/300x300?text=Foto+3'
+      ];
+      filled.push(dummyImages[filled.length % dummyImages.length]);
+    }
+    return filled.slice(0, 3);
+  })();
+
+  const handlePrevImage = () => {
+    setActiveImageIndex((prev) => (prev === 0 ? imageSources.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
+  };
+
   const handleDelete = () => {
     setModal({
       isOpen: true,
@@ -118,9 +165,10 @@ function DetailLaporan() {
       <Navbar />
       <div className="detail-main">
         <h1 className="detail-title">Detail Laporan</h1>
-        <div className="detail-container">
-          <div className="detail-card">
-            <div className="detail-header">
+        <div className="detail-wrapper">
+          <div className="detail-container">
+            <div className="detail-card">
+              <div className="detail-header">
               <span className="detail-id">{id}</span>
               <span className={`detail-status ${getStatusClass(report?.status)}`}>
                 {statusMap[report?.status] || report?.status || 'To-Do'}
@@ -130,7 +178,6 @@ function DetailLaporan() {
             <div className="detail-content">
               <div className="detail-info">
                 <div className="info-section">
-                  <h3 className="section-title">Informasi Pelapor</h3>
                   <div className="info-row">
                     <span className="info-label">Nama Pelapor</span>
                     <span className="info-value">{report?.email_pelapor || '-'}</span>
@@ -143,12 +190,8 @@ function DetailLaporan() {
                     <span className="info-label">Tanggal Kejadian</span>
                     <span className="info-value">{report?.tanggal || '-'}</span>
                   </div>
-                </div>
-
-                <div className="info-section">
-                  <h3 className="section-title">Detail Pengaduan</h3>
                   <div className="info-row">
-                    <span className="info-label">Nama Barang</span>
+                    <span className="info-label">Nama Aset</span>
                     <span className="info-value">{report?.nama_barang || '-'}</span>
                   </div>
                   <div className="info-row full-width">
@@ -158,15 +201,46 @@ function DetailLaporan() {
                 </div>
               </div>
 
-              <div className="detail-image" onClick={() => setImageModal(true)}>
-                <div className="image-wrapper">
-                  <img src={report?.image_url || 'https://via.placeholder.com/400x500.png?text=Foto'} alt="Lampiran" />
-                  <div className="image-overlay">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="#fff">
-                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                    </svg>
-                    <span>Klik untuk memperbesar</span>
+              <div className="detail-image">
+                <div className="image-slider">
+                  <div
+                    className="image-track"
+                    style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
+                  >
+                    {imageSources.map((src, idx) => (
+                      <div className="image-slide" key={idx} onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}>
+                        <div className="image-wrapper">
+                          <img src={src} alt={`Lampiran ${idx + 1}`} />
+                          <div className="image-overlay">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="#fff">
+                              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                            </svg>
+                            <span>Klik untuk memperbesar</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  {imageSources.length > 1 && (
+                    <>
+                      <button className="slider-arrow prev" onClick={handlePrevImage} aria-label="Sebelumnya">
+                        ‹
+                      </button>
+                      <button className="slider-arrow next" onClick={handleNextImage} aria-label="Berikutnya">
+                        ›
+                      </button>
+                      <div className="slider-dots">
+                        {imageSources.map((_, idx) => (
+                          <button
+                            key={idx}
+                            className={`slider-dot ${idx === activeImageIndex ? 'active' : ''}`}
+                            onClick={() => setActiveImageIndex(idx)}
+                            aria-label={`Pilih gambar ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -194,6 +268,49 @@ function DetailLaporan() {
                   Hapus
                 </button>
               </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="similar-reports">
+            <div className="similar-reports-inner">
+              <h2 className="similar-reports-title">Laporan Serupa</h2>
+              <div className="similar-reports-list">
+                {similarReports.length > 0 ? (
+                  similarReports.map((simReport) => (
+                    <div 
+                      key={simReport.id} 
+                      className="similar-report-item"
+                      onClick={() => navigate(`/laporan/${simReport.id}`)}
+                    >
+                      <div className="similar-report-header">
+                        <span className="similar-report-id">{simReport.id}</span>
+                        <span className={`similar-report-status ${getStatusClass(simReport.status)}`}>
+                          {statusMap[simReport.status] || simReport.status || 'To-Do'}
+                        </span>
+                      </div>
+                      <div className="similar-report-info">
+                        <div className="similar-info-row">
+                          <span className="similar-info-label">Nama Pelapor:</span>
+                          <span className="similar-info-value">{simReport.email_pelapor || '-'}</span>
+                        </div>
+                        <div className="similar-info-row">
+                          <span className="similar-info-label">Tanggal Kejadian:</span>
+                          <span className="similar-info-value">{simReport.tanggal || '-'}</span>
+                        </div>
+                        <div className="similar-info-row">
+                          <span className="similar-info-label">Nama Aset:</span>
+                          <span className="similar-info-value">{simReport.nama_barang || '-'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="similar-report-empty">
+                    <p>Tidak ada laporan serupa</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -207,7 +324,27 @@ function DetailLaporan() {
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
-            <img src={report?.image_url || 'https://via.placeholder.com/400x500.png?text=Foto'} alt="Lampiran Besar" />
+            <img src={imageSources[activeImageIndex] || 'https://via.placeholder.com/400x500.png?text=Foto'} alt="Lampiran Besar" />
+            {imageSources.length > 1 && (
+              <>
+                <button className="image-modal-arrow prev" onClick={handlePrevImage} aria-label="Sebelumnya">
+                  ‹
+                </button>
+                <button className="image-modal-arrow next" onClick={handleNextImage} aria-label="Berikutnya">
+                  ›
+                </button>
+                <div className="image-modal-dots">
+                  {imageSources.map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`image-modal-dot ${idx === activeImageIndex ? 'active' : ''}`}
+                      onClick={() => setActiveImageIndex(idx)}
+                      aria-label={`Pilih gambar ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

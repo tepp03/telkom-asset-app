@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import LaporanAset from './pages/LaporanAset';
 import DetailLaporan from './pages/DetailLaporan';
 import './App.css';
+import Footer from './components/Footer';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +48,7 @@ function App() {
           element={isAuthenticated ? <DetailLaporan /> : <Navigate to="/login" />} 
         />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

@@ -1,3 +1,17 @@
+.home-container {
+  min-height: 100vh;
+  background: #f7f7f9;
+}
+
+.home-content {
+  padding: 28px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.home-header {
+  padding: 16px 32px;
+}
 .logo-section {
   display: flex;
   align-items: center;

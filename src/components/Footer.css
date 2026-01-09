@@ -1,0 +1,22 @@
+.login-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 14px;
+  width: 100%;
+  align-self: stretch;
+}
+
+.footer-divider {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #c1001f;
+  opacity: 0.8;
+}

@@ -11,17 +11,14 @@
 .dashboard-main {
   position: relative;
   z-index: 1;
-  padding: 24px 48px 48px 48px;
-  flex: 1;                  /* take remaining height under navbar */
-  display: flex;            /* center its content */
-  flex-direction: column;
-  align-items: center;      /* horizontal center */
-  justify-content: center;  /* vertical center */
+  padding: 28px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .dashboard-hero {
-  text-align: center;
-  margin: 24px 0 32px 0;
+  text-align: left;
+  margin: 8px 0 24px 0;
 }
 
 .dashboard-title {
@@ -40,10 +37,7 @@
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(5, 220px);
-  justify-content: center; /* center the row */
   gap: 26px;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .stat-card {

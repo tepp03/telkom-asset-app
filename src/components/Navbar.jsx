@@ -43,7 +43,7 @@ function Navbar({ searchTerm, onSearchChange }) {
         <div className="navbar-brand">
           <img src={logoTelkom} alt="Telkom Logo" className="navbar-logo" />
           <div className="navbar-brand-text">
-            <div className="navbar-brand-title">PT. TELKOM</div>
+            <div className="navbar-brand-title">PT.Telkom</div>
             <div className="navbar-brand-subtitle">Witel Jakarta Centrum</div>
           </div>
         </div>

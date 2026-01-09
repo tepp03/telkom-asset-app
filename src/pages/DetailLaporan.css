@@ -18,6 +18,13 @@
   margin: 0 0 24px 0;
 }
 
+.detail-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: stretch;
+}
+
 .detail-container {
   animation: none;
 }
@@ -134,12 +141,87 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  cursor: default;
+}
+
+.image-slider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.image-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.image-slide {
+  min-width: 100%;
+}
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  font-size: 18px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.slider-arrow.prev {
+  left: 14px;
+  transform: translateY(-50%);
+}
+
+.slider-arrow.next {
+  right: 14px;
+  left: auto;
+  transform: translateY(-50%);
+}
+
+.slider-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.slider-dot {
+  width: 24px;
+  height: auto;
+  border: none;
+  border-bottom: 1.5px solid #fff;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.slider-dot.active {
+  border-bottom-color: #ff1a1a;
 }
 
 .image-wrapper {
   position: relative;
   width: 100%;
+  height: 300px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
@@ -153,7 +235,7 @@
 
 .image-wrapper img {
   width: 100%;
-  max-height: 500px;
+  height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
@@ -265,6 +347,69 @@
   width: 60px;
   height: 60px;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.9));
+}
+
+.image-modal-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  font-size: 18px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 2002;
+}
+
+.image-modal-arrow:hover {
+  background: transparent;
+  border-color: #fff;
+  transform: translateY(-50%) scale(1.03);
+}
+
+.image-modal-arrow.prev {
+  left: 30px;
+}
+
+.image-modal-arrow.next {
+  right: 30px;
+  left: auto;
+}
+
+.image-modal-dots {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 2002;
+}
+
+.image-modal-dot {
+  width: 24px;
+  height: auto;
+  border: none;
+  border-bottom: 1.5px solid #fff;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.image-modal-dot.active {
+  border-bottom-color: #ff1a1a;
 }
 
 .detail-actions {
@@ -441,5 +586,178 @@
   50% { 
     transform: translate(40px, -60px) scale(1.2);
     border-radius: 29% 71% 52% 48% / 64% 36% 64% 36%;
+  }
+}
+
+/* Similar Reports Section */
+.similar-reports {
+  align-self: stretch;
+  display: flex;
+}
+
+.similar-reports-inner {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: none;
+  border: none;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.similar-reports-title {
+  background: linear-gradient(135deg, #ff1a1a 0%, #e00000 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  display: block;
+  /* stretch edge-to-edge of the card top */
+  margin: -20px -20px 16px -20px;
+  padding: 16px 20px;
+  border-radius: 20px 20px 0 0; /* top-left/top-right only */
+}
+
+.similar-reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+  flex: 1;
+  min-height: 0;
+  max-height: 470px; /* show ~3 items, scroll for the rest */
+}
+
+.similar-reports-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.similar-reports-list::-webkit-scrollbar-track {
+  background: rgba(255, 26, 26, 0.08);
+  border-radius: 10px;
+}
+
+.similar-reports-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff1a1a 0%, #e00000 100%);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.similar-reports-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e00000 0%, #c00000 100%);
+  box-shadow: 0 0 8px rgba(255, 26, 26, 0.4);
+}
+
+.similar-report-item {
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+.similar-report-item:hover {
+  background: #fafafa;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.similar-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.similar-report-id {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e00000;
+  word-break: break-all;
+  letter-spacing: 0.5px;
+}
+
+.similar-report-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.similar-report-info {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.similar-info-row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  align-items: flex-start;
+}
+
+.similar-info-label {
+  font-weight: 700;
+  color: #000;
+  min-width: 65px;
+}
+
+.similar-info-value {
+  color: #000;
+  word-break: break-word;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.similar-report-empty {
+  padding: 24px 12px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 26, 26, 0.05), rgba(224, 0, 0, 0.05));
+  border-radius: 12px;
+  border: 1px solid rgba(255, 26, 26, 0.1);
+  color: #ff1a1a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .detail-wrapper {
+    grid-template-columns: 1fr 280px;
+  }
+  
+  .similar-reports {
+    top: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .detail-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .similar-reports {
+    position: static;
+    margin-top: 24px;
+  }
+  
+  .similar-reports-list {
+    max-height: 440px;
   }
 }

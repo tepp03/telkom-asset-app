@@ -96,9 +96,7 @@ function Login({ setAuth }) {
         </div>
       </div>
 
-      <footer className="login-footer">
-        <span>Copyright © 2025 by Intern Informatics Diponegoro University</span>
-      </footer>
+      {/* Footer is now global via App.jsx */}
     </div>
   );
 }
