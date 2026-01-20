@@ -83,14 +83,18 @@ function Login({ setAuth, setRole }) {
                       // Error login
                       throw new Error(data?.error || 'Login gagal');
                     }
-                    // Simpan token
+                    // Validasi role
+                    const role = data.user?.role;
+                    if (role !== 'admin' && role !== 'teknisi') {
+                      throw new Error('Role tidak valid. Hubungi admin.');
+                    }
+                    // Simpan token dan role
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userName', username);
-                    if (data.user?.role) localStorage.setItem('role', data.user.role);
+                    localStorage.setItem('role', role);
                     if (setAuth) setAuth(true);
-                    if (setRole) setRole(data.user?.role);
+                    if (setRole) setRole(role);
                     // Redirect sesuai role
-                    const role = data.user?.role;
                     if (role === 'teknisi') navigate('/teknisi/laporan-aset');
                     else navigate('/laporan-aset');
                   } catch (err) {

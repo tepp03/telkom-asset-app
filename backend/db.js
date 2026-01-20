@@ -1,10 +1,3 @@
-// Import library
-// Path dan direktori database
-// Pastikan direktori data ada
-// Buka koneksi database
-// Query run (insert/update/delete)
-// Query get (select satu baris)
-// Inisialisasi database dan tabel
 const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
