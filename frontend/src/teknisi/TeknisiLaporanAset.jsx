@@ -1,8 +1,3 @@
-// Import library
-// Map status
-// Fungsi untuk class status
-// Custom hook ambil data laporan
-// Komponen utama
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../shared/components/Navbar';
@@ -117,7 +112,7 @@ export default function TeknisiLaporanAset() {
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
-                  <tr key={item.id} style={{ cursor:'pointer' }} onClick={() => navigate(`/teknisi/laporan/${item.id}`)}>
+                  <tr key={item.id} style={{ cursor:'pointer' }} onClick={() => window.open(`/teknisi/laporan/${item.id}`, '_blank')}>
                     <td><span className="table-code">{item.id}</span></td>
                     <td>{item.email_pelapor || '-'}</td>
                     <td>{item.unit || '-'}</td>

@@ -1,11 +1,3 @@
-// Import library dan komponen
-// Map status
-// Fungsi untuk class status
-// Fungsi untuk class status berikutnya
-// Komponen utama
-  // Back ke daftar laporan
-  // State
-  // Set judul tab
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../shared/components/Navbar';
 import './DetailLaporan.css';
@@ -36,11 +28,12 @@ const getNextStatusClass = (status) => {
 };
 
 function DetailLaporan() {
-    // Intercept tombol back browser agar langsung ke daftar laporan
+    // Blokir tombol back browser agar tidak bisa kembali ke halaman sebelumnya
     useEffect(() => {
+      // Push dummy state agar history tidak bisa di-back
+      window.history.pushState(null, '', window.location.href);
       const handlePopState = (e) => {
-        e.preventDefault();
-        window.location.replace('/laporan-aset');
+        window.history.pushState(null, '', window.location.href);
       };
       window.addEventListener('popstate', handlePopState);
       return () => {
@@ -176,7 +169,7 @@ function DetailLaporan() {
   const handleStatusCycle = () => {
     if (!report) return;
     const currentMapped = statusMap[report.status];
-    // Hanya kirim nilai yang diizinkan backend: 'To-Do', 'In Progress', 'Done'
+    // Hanya kirim nilai: 'To-Do', 'In Progress', 'Done'
     const statusFlow = {
       'To-Do': { next: 'Processed', db: 'In Progress', msg: 'Mulai proses pengerjaan?' },
       'Processed': { next: 'Done', db: 'Done', msg: 'Tandai laporan sebagai selesai?' },

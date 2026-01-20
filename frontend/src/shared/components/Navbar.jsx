@@ -1,9 +1,3 @@
-// Import library dan style
-// Komponen Navbar
-  // State
-  // Ambil role user
-  // Logout
-  // Tampilkan search
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import { useState, useEffect, useRef } from 'react';

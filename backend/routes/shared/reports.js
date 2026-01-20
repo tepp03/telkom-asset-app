@@ -1,8 +1,3 @@
-// Import library dan middleware
-// Router laporan (admin)
-// Endpoint list laporan
-// Endpoint detail laporan
-// Endpoint hapus laporan
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { authenticateToken, requireAdmin } = require('../../middleware/auth');

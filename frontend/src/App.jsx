@@ -1,8 +1,3 @@
-// Import library dan komponen
-// Komponen utama App
-  // Cek autentikasi
-  // Cegah back ke login/detail
-  // Loading
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import Login from './shared/Login';
@@ -27,7 +22,7 @@ function App() {
     setLoading(false);
   }, []);
 
-  // Sync state jika localStorage berubah (misal login/logout)
+  // Sync state jika localStorage berubah (login/logout)
   useEffect(() => {
     const syncAuth = () => {
       const token = localStorage.getItem('token');

@@ -1,9 +1,3 @@
-// Import library dan komponen
-// Custom hook set judul
-// Map status
-// Fungsi untuk class status
-// Custom hook ambil data laporan
-// Komponen utama
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../shared/components/Navbar';
 import './LaporanAset.css';
@@ -135,7 +129,7 @@ function LaporanAset() {
               </thead>
               <tbody>
                 {filteredItems.map((item, index) => (
-                  <tr key={item.id} onClick={() => navigate(`/laporan/${item.id}`)} style={{cursor: 'pointer'}}>
+                  <tr key={item.id} onClick={() => window.open(`/laporan/${item.id}`, '_blank')} style={{cursor: 'pointer'}}>
                     <td>
                       <span className="table-code">{item.id}</span>
                     </td>
