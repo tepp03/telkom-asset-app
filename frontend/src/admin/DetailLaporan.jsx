@@ -311,6 +311,13 @@ function DetailLaporan() {
             return;
           }
 
+          // Jika dibuka di tab baru, reload tab utama lalu tutup tab detail
+          if (window.opener && !window.opener.closed) {
+            window.opener.location.reload();
+            window.close();
+            return;
+          }
+          // Jika tidak, redirect ke daftar laporan
           navigate('/laporan-aset');
         } catch (e) {
           alert('Terjadi kesalahan saat menghapus laporan.');
