@@ -21,11 +21,23 @@ const upload = multer({ storage });
 
 const router = express.Router();
 
+function normalizeUrl(url) {
+  if (!url) return url;
+  return url.replace(/^\/api\/uploads\//, '/uploads/');
+}
+
 // List reports (teknisi view)
 router.get('/reports', authenticateToken, requireTeknisi, async (req, res) => {
   try {
     const { search } = req.query;
     let rows = await listReports();
+    // Normalize legacy image URLs
+    rows = rows.map(r => ({
+      ...r,
+      image_url: normalizeUrl(r.image_url),
+      image_url2: normalizeUrl(r.image_url2),
+      image_url3: normalizeUrl(r.image_url3)
+    }));
 
     if (search) {
       const term = search.toLowerCase();
@@ -59,7 +71,14 @@ router.get('/reports/:id', authenticateToken, requireTeknisi, async (req, res) =
   try {
     const row = await getReportById(req.params.id);
     if (!row) return res.status(404).json({ error: 'Report not found' });
-    res.json(row);
+    // Normalize legacy image URLs
+    const normalized = {
+      ...row,
+      image_url: normalizeUrl(row.image_url),
+      image_url2: normalizeUrl(row.image_url2),
+      image_url3: normalizeUrl(row.image_url3)
+    };
+    res.json(normalized);
   } catch (e) {
     res.status(500).json({ error: 'Failed to get report' });
   }

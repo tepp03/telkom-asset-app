@@ -3,7 +3,7 @@ import './PelaporLaporanForm.css';
 import Navbar from '../shared/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
-const WA_ADMIN = '6281234567890'; // Ganti dengan nomor WA admin
+const WA_ADMIN = '6285195003001'; // Nomor: 0851-9500-3001
 const WA_MESSAGE = encodeURIComponent('Halo Admin, saya ingin bertanya tentang laporan pengaduan.');
 
 const PelaporLaporanForm = ({ onSuccess }) => {
@@ -49,6 +49,9 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   const [selected, setSelected] = useState(null);
   const [loadingInbox, setLoadingInbox] = useState(true);
   const [fotoPreview, setFotoPreview] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [laporanId, setLaporanId] = useState('');
 
   const handleChange = e => {
     const { name, value, files } = e.target;
@@ -73,7 +76,12 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     });
     setLoading(false);
     if (res.ok) {
+      const result = await res.json();
       setForm({ nama: '', unit: lokasiUnitOptions[0], tanggal: tanggalOptions[0], aset: '', deskripsi: '', foto: null });
+      setFotoPreview(null);
+      setLaporanId(result.laporan.id);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
       fetchLaporan();
       if (onSuccess) onSuccess();
     } else {
@@ -102,6 +110,15 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   return (
     <>
       <Navbar />
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-modal">
+            <span className="popup-icon">✓</span>
+            <h3>Laporan Terkirim!</h3>
+            <p>ID: <strong>{laporanId.substring(0, 8)}</strong></p>
+          </div>
+        </div>
+      )}
       <form className="pelapor-laporan-form" onSubmit={handleSubmit}>
         <h2>Buat Laporan Pengaduan</h2>
         {error && <div className="error">{error}</div>}
@@ -146,7 +163,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         <div className="form-group foto">
           <label htmlFor="foto">Foto Bukti (wajib)</label>
           <label htmlFor="foto" className="custom-file-label">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e00000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="4"/><path d="M5.5 7h13l-1.38-2.76A2 2 0 0 0 15.03 3H8.97a2 2 0 0 0-1.79 1.24L5.5 7z"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e00000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="4"/><path d="M5.5 7h13l-1.38-2.76A2 2 0 0 0 15.03 3H8.97a2 2 0 0 0-1.79 1.24L5.5 7z"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>
             Pilih Foto
           </label>
           <input id="foto" name="foto" type="file" accept="image/*" onChange={handleChange} required />

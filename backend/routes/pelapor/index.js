@@ -18,20 +18,60 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-
-const { v4: uuidv4 } = require('uuid');
 const { openDb } = require('../../db');
+
+// Mapping unit/lokasi ke kode singkat
+const unitCodeMap = {
+  'Lantai 1 - Front Office': 'FO',
+  'Lantai 1 - Customer Service': 'CS',
+  'Lantai 2 - Ruang Rapat': 'RR',
+  'Lantai 2 - Kantor Manager': 'KM',
+  'Lantai 3 - IT Support': 'IT',
+  'Lantai 3 - Gudang': 'GD',
+  'Lantai 4 - Pantry': 'PT',
+  'Lantai 4 - Ruang Meeting': 'RM',
+  'Basement - Parkir': 'BP',
+  'Lobby Utama': 'LB',
+  'Ruang Server': 'SV',
+  'Kantin': 'KT',
+  'Toilet Pria': 'TP',
+  'Toilet Wanita': 'TW',
+  'Area Luar Gedung': 'AG'
+};
+
+// Fungsi untuk generate ID berdasarkan unit dengan nomor urut
+async function generateReportId(unit) {
+  const db = openDb();
+  const code = unitCodeMap[unit] || 'LR'; // Default LR jika unit tidak dikenali
+  
+  // Hitung laporan dengan kode yang sama untuk mendapat nomor urut
+  const result = await new Promise((resolve, reject) => {
+    db.get(
+      'SELECT COUNT(*) as count FROM reports WHERE id LIKE ?',
+      [`${code}-%`],
+      (err, row) => {
+        if (err) return reject(err);
+        resolve(row ? row.count : 0);
+      }
+    );
+  });
+  
+  const nextNumber = result + 1;
+  const paddedNumber = String(nextNumber).padStart(3, '0');
+  return `${code}-${paddedNumber}`;
+}
 
 // POST /api/pelapor/laporan - tambah laporan ke DB
 router.post('/laporan', upload.single('foto'), async (req, res) => {
   const { nama, unit, tanggal, aset, deskripsi } = req.body;
-  const foto = req.file ? '/api/uploads/' + req.file.filename : null;
+  // Simpan URL sesuai static route di server: '/uploads/*'
+  const foto = req.file ? '/uploads/' + req.file.filename : null;
   if (!nama || !unit || !tanggal || !aset || !deskripsi || !foto) {
     return res.status(400).json({ error: 'Semua field wajib diisi' });
   }
   const db = openDb();
-  const id = uuidv4();
   try {
+    const id = await generateReportId(unit);
     await new Promise((resolve, reject) => {
       db.run(
         'INSERT INTO reports (id, email_pelapor, nama_barang, tanggal, unit, deskripsi, image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -61,7 +101,7 @@ router.get('/laporan', async (req, res) => {
       tanggal: r.tanggal,
       aset: r.nama_barang,
       deskripsi: r.deskripsi,
-      foto: r.image_url,
+      foto: (r.image_url || '').replace(/^\/api\/uploads\//, '/uploads/'),
       status: r.status || 'Pending'
     }));
     res.json(mapped);
