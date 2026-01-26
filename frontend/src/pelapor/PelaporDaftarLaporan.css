@@ -1,0 +1,87 @@
+html, body, #root, .pelapor-daftar-page {
+  background: #fff !important;
+  min-height: 100vh !important;
+  width: 100vw !important;
+  box-sizing: border-box;
+}
+.pelapor-daftar-page {
+  min-height: 100vh;
+  background: #fff !important;
+  width: 100vw;
+  min-width: 100vw;
+  box-sizing: border-box;
+}
+.pelapor-daftar-wrap {
+  padding: 12px 6px;
+  max-width: 420px;
+  margin: 0 auto 60px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pelapor-daftar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pelapor-daftar-title {
+  color: #e00000;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+}
+.pelapor-table-container {
+  background: #fff;
+  border-radius: 12px;
+  overflow: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 32px;
+}
+.pelapor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.pelapor-table thead {
+  background: linear-gradient(135deg, #ff1a1a 0%, #e00000 100%);
+  color: #fff;
+}
+.pelapor-table thead th {
+  padding: 10px 10px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(255,255,255,0.18);
+}
+.pelapor-table thead th:first-child {
+  border-radius: 16px 0 0 0;
+}
+.pelapor-table thead th:last-child {
+  border-radius: 0 16px 0 0;
+  width: 100px;
+}
+.pelapor-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.pelapor-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.pelapor-detail-link {
+  color: #e00000;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.status-to-do {
+  background: #ef5350;
+  color: #fff;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

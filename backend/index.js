@@ -10,6 +10,8 @@ const authRouter = require('./routes/shared/auth');
 const reportsRouter = require('./routes/shared/reports');
 const adminRouter = require('./routes/admin');
 const teknisiRouter = require('./routes/teknisi');
+
+const pelaporRouter = require('./routes/pelapor');
 const sessionConfig = require('./sessionConfig');
 
 const app = express();
@@ -86,6 +88,7 @@ app.get('/api/health', (req, res) => {
 // Routers
 app.use('/api', authRouter);        // /login, /me
 app.use('/api', reportsRouter);     // /reports (shared)
+app.use('/api/pelapor', pelaporRouter); // /pelapor/laporan
 
 // Serve uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'data', 'uploads')));

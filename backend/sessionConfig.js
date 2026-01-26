@@ -8,7 +8,7 @@ module.exports = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 2, // 2 jam
+    maxAge: 1000 * 60 * 60 * 2, 
     httpOnly: true,
     secure: false // set true jika pakai https
   }

@@ -1,0 +1,97 @@
+.pelapor-detail-page {
+  min-height: 100vh;
+  background: #f7f7f9;
+}
+.pelapor-detail-main {
+  padding: 28px 32px;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+.pelapor-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.pelapor-detail-title {
+  color: #e00000;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+}
+.pelapor-detail-back {
+  background: none;
+  border: none;
+  color: #e00000;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.pelapor-detail-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.pelapor-detail-header {
+  background: linear-gradient(135deg, #ff1a1a 0%, #e00000 100%);
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pelapor-detail-id {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+}
+.pelapor-detail-status {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #ef5350;
+  color: #fff;
+}
+.pelapor-detail-content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.info-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.info-row:last-child {
+  border-bottom: none;
+}
+.info-label {
+  color: #666;
+  font-weight: 600;
+  font-size: 14px;
+}
+.info-value {
+  color: #333;
+  font-weight: 500;
+  font-size: 15px;
+}
+.detail-image img {
+  border-radius: 10px;
+  max-width: 320px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}

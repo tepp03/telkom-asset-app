@@ -27,17 +27,22 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
   const profileDropdownRef = useRef(null);
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-
-  fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
-    .then((r) => r.json())
-    .then((data) => {
-      const role = data?.user?.role;
-      setRoleLabel(role === 'teknisi' ? 'Teknisi' : 'Admin 1');
-    })
-    .catch(() => {});
-}, []);
+    // Deteksi role dari localStorage atau path
+    const role = localStorage.getItem('role');
+    if (role === 'pelapor') {
+      setRoleLabel('Pelapor');
+      return;
+    }
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((data) => {
+        const role = data?.user?.role;
+        setRoleLabel(role === 'teknisi' ? 'Teknisi' : 'Admin 1');
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     setShowLogoutModal(true);

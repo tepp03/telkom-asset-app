@@ -167,6 +167,7 @@ async function getTeknisiByUsername(username) {
 
 module.exports = {
   init,
+  openDb,
   getAdminByUsername,
   getTeknisiByUsername,
   // helpers for reports

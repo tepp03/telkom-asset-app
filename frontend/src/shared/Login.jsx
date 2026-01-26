@@ -67,11 +67,19 @@ function Login({ setAuth, setRole }) {
               className="login-form"
                 // Submit login
                 onSubmit={async (e) => {
-                  e.preventDefault(); // Stop reload
-                  setError(''); // Reset error
-                  setLoading(true); // Loading
+                  e.preventDefault();
+                  setError('');
+                  setLoading(true);
                   try {
-                    // Kirim login
+                    // Login pelapor (tanpa backend)
+                    if (username === 'pelapor' && password === 'pelapor123') {
+                      localStorage.setItem('role', 'pelapor');
+                      if (setAuth) setAuth(true);
+                      if (setRole) setRole('pelapor');
+                      navigate('/pelapor/inbox');
+                      return;
+                    }
+                    // Login admin/teknisi (via backend)
                     const res = await fetch('/api/login', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -79,28 +87,22 @@ function Login({ setAuth, setRole }) {
                     });
                     const data = await res.json();
                     if (!res.ok) {
-                      // Error login
                       throw new Error(data?.error || 'Login gagal');
                     }
-                    // Validasi role
                     const role = data.user?.role;
                     if (role !== 'admin' && role !== 'teknisi') {
                       throw new Error('Role tidak valid. Hubungi admin.');
                     }
-                    // Simpan token dan role
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userName', username);
                     localStorage.setItem('role', role);
                     if (setAuth) setAuth(true);
                     if (setRole) setRole(role);
-                    // Redirect sesuai role
                     if (role === 'teknisi') navigate('/teknisi/laporan-aset');
                     else navigate('/laporan-aset');
                   } catch (err) {
-                    // Tampilkan error
                     setError(err.message);
                   } finally {
-                    // Selesai loading
                     setLoading(false);
                   }
                 }}
