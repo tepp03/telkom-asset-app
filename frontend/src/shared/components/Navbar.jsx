@@ -59,7 +59,8 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
     window.location.href = '/login';
   };
 
-  const showSearch = location.pathname.startsWith('/laporan-aset') || location.pathname.startsWith('/teknisi/laporan-aset');
+  // Tampilkan search/filter juga untuk pelapor/daftar-laporan
+  const showSearch = location.pathname.startsWith('/laporan-aset') || location.pathname.startsWith('/teknisi/laporan-aset') || location.pathname.startsWith('/pelapor/daftar-laporan');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -97,6 +98,7 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
               placeholder="Cari berdasarkan Pelapor, Lokasi, Tanggal, Aset, Deskripsi" 
               value={searchTerm || ''}
               onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+              autoFocus={window.location.pathname.startsWith('/pelapor/daftar-laporan')}
             />
             <span className="search-icon" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

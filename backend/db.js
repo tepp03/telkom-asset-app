@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 
 const DATA_DIR = path.join(__dirname, 'data');
-const DB_PATH = path.join(DATA_DIR, 'app.db');
+const DB_PATH = path.join(DATA_DIR, 'app.sqlite');
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
@@ -53,7 +53,7 @@ async function init() {
     status TEXT DEFAULT 'Pending'
   )`);
 
-  // Ensure additional image columns exist
+  // Ensure additional columns exist (image_url2, image_url3, created_at)
   try {
     const info = await new Promise((resolve, reject) => {
       db.all("PRAGMA table_info('reports')", (err, rows) => {
@@ -67,6 +67,9 @@ async function init() {
     }
     if (!cols.includes('image_url3')) {
       await run(db, 'ALTER TABLE reports ADD COLUMN image_url3 TEXT');
+    }
+    if (!cols.includes('created_at')) {
+      await run(db, "ALTER TABLE reports ADD COLUMN created_at TEXT DEFAULT (datetime('now'))");
     }
   } catch (_) {
     // ignore migration errors if columns already exist
@@ -174,7 +177,7 @@ module.exports = {
   listReports: () => {
     const db = openDb();
     return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM reports ORDER BY id', (err, rows) => {
+      db.all('SELECT * FROM reports ORDER BY created_at ASC, id ASC', (err, rows) => {
         if (err) return reject(err);
         resolve(rows);
       });

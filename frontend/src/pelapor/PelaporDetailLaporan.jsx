@@ -20,6 +20,17 @@ const getStatusClass = (status) => {
 };
 
 export default function PelaporDetailLaporan() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [report, setReport] = useState(null);
+  const [error, setError] = useState('');
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [allReports, setAllReports] = useState([]);
+  const [similarReports, setSimilarReports] = useState([]);
+  const [imageModal, setImageModal] = useState(false);
+  // Tombol berikutnya: urutan sesuai allReports
+  const currentIndex = allReports.findIndex(r => r.id === id);
+  const nextId = currentIndex >= 0 && currentIndex < allReports.length - 1 ? allReports[currentIndex + 1].id : (allReports.length > 0 ? allReports[0].id : null);
   useEffect(() => {
     window.history.pushState(null, '', window.location.href);
     const handlePopState = (e) => {
@@ -30,14 +41,7 @@ export default function PelaporDetailLaporan() {
       window.removeEventListener('popstate', handlePopState);
     };
   }, []);
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [report, setReport] = useState(null);
-  const [error, setError] = useState('');
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [allReports, setAllReports] = useState([]);
-  const [similarReports, setSimilarReports] = useState([]);
-  const [imageModal, setImageModal] = useState(false);
+  // ...existing code...
 
   useEffect(() => {
     if (report && report.nama_barang && id) {
@@ -186,6 +190,19 @@ export default function PelaporDetailLaporan() {
                       )}
                     </div>
                   </div>
+                </div>
+                <div className="detail-actions">
+                  <button
+                    className="btn-next"
+                    type="button"
+                    onClick={() => {
+                      if (nextId && nextId !== id) navigate(`/pelapor/laporan/${nextId}`);
+                      else if (allReports.length > 1) navigate(`/pelapor/laporan/${allReports[0].id}`);
+                    }}
+                    disabled={allReports.length <= 1}
+                  >
+                    Berikutnya &rarr;
+                  </button>
                 </div>
               </div>
             </div>

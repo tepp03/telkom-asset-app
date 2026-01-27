@@ -7,11 +7,6 @@ const WA_ADMIN = '6285195003001'; // Nomor: 0851-9500-3001
 const WA_MESSAGE = encodeURIComponent('Halo Admin, saya ingin bertanya tentang laporan pengaduan.');
 
 const PelaporLaporanForm = ({ onSuccess }) => {
-  useEffect(() => {
-    document.body.classList.add('pelapor-bg');
-    return () => document.body.classList.remove('pelapor-bg');
-  }, []);
-
   const lokasiUnitOptions = [
     'Lantai 1 - Front Office',
     'Lantai 1 - Customer Service',
@@ -41,27 +36,55 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     tanggal: tanggalOptions[0],
     aset: '',
     deskripsi: '',
-    foto: null
+    foto: []
   });
+
+  const [fotoPreview, setFotoPreview] = useState([]);
+
+  // Handle file add (append, not replace)
+  const handleFiles = files => {
+    let arr = Array.from(files);
+    let newFiles = form.foto.concat(arr).slice(0, 3);
+    setFotoPreview(newFiles.map(f => URL.createObjectURL(f)));
+    setForm(f => ({ ...f, foto: newFiles }));
+  };
+
+  // Remove file by index
+  const removeFile = idx => {
+    const newFiles = form.foto.filter((_, i) => i !== idx);
+    setFotoPreview(newFiles.map(f => URL.createObjectURL(f)));
+    setForm(f => ({ ...f, foto: newFiles }));
+  };
+
+  // Sync previews if value changes from parent
+  useEffect(() => {
+    setFotoPreview(form.foto.map(f => URL.createObjectURL(f)));
+    // eslint-disable-next-line
+  }, [form.foto]);
+  useEffect(() => {
+    document.body.classList.add('pelapor-bg');
+    return () => document.body.classList.remove('pelapor-bg');
+  }, []);
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [laporan, setLaporan] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loadingInbox, setLoadingInbox] = useState(true);
-  const [fotoPreview, setFotoPreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [laporanId, setLaporanId] = useState('');
 
   const handleChange = e => {
     const { name, value, files } = e.target;
-    if (name === 'foto' && files && files[0]) {
-      setFotoPreview(URL.createObjectURL(files[0]));
+    if (name === 'foto' && files) {
+      handleFiles(files);
+    } else {
+      setForm(f => ({
+        ...f,
+        [name]: value
+      }));
     }
-    setForm(f => ({
-      ...f,
-      [name]: files ? files[0] : value
-    }));
   };
 
   const handleSubmit = async e => {
@@ -69,7 +92,13 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     setLoading(true);
     setError('');
     const data = new FormData();
-    Object.entries(form).forEach(([k, v]) => data.append(k, v));
+    Object.entries(form).forEach(([k, v]) => {
+      if (k === 'foto' && Array.isArray(v)) {
+        v.forEach(file => data.append('foto', file));
+      } else {
+        data.append(k, v);
+      }
+    });
     const res = await fetch('/api/pelapor/laporan', {
       method: 'POST',
       body: data
@@ -77,8 +106,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     setLoading(false);
     if (res.ok) {
       const result = await res.json();
-      setForm({ nama: '', unit: lokasiUnitOptions[0], tanggal: tanggalOptions[0], aset: '', deskripsi: '', foto: null });
-      setFotoPreview(null);
+      setForm({ nama: '', unit: lokasiUnitOptions[0], tanggal: tanggalOptions[0], aset: '', deskripsi: '', foto: [] });
       setLaporanId(result.laporan.id);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
@@ -113,9 +141,19 @@ const PelaporLaporanForm = ({ onSuccess }) => {
       {showPopup && (
         <div className="popup-overlay">
           <div className="popup-modal">
-            <span className="popup-icon">✓</span>
-            <h3>Laporan Terkirim!</h3>
-            <p>ID: <strong>{laporanId.substring(0, 8)}</strong></p>
+            <div className="popup-content-row">
+              <span className="popup-icon" style={{background: '#1fa84b'}}>
+                {/* Simple checkmark icon only */}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="16" fill="#1fa84b"/>
+                  <path d="M10 17.5L14 21L22 13" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              <div className="popup-texts">
+                <h3>Laporan Terkirim!</h3>
+                <p>ID: <strong>{laporanId.substring(0, 8)}</strong></p>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -133,6 +171,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
               <option key={opt} value={opt}>{opt}</option>
             ))}
           </select>
+          <span className="select-arrow" />
         </div>
         <div className="form-group tanggal">
           <label htmlFor="tanggal">Tanggal Kejadian</label>
@@ -161,15 +200,52 @@ const PelaporLaporanForm = ({ onSuccess }) => {
           />
         </div>
         <div className="form-group foto">
-          <label htmlFor="foto">Foto Bukti (wajib)</label>
-          <label htmlFor="foto" className="custom-file-label">
+          <label htmlFor="foto">Foto Bukti (maksimal 3)</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            id="multi-image-upload"
+            onChange={e => handleFiles(e.target.files)}
+            disabled={form.foto.length >= 3}
+          />
+          <label htmlFor="multi-image-upload" className="custom-file-label" style={{marginBottom:8, cursor: form.foto.length>=3?'not-allowed':'pointer'}}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e00000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="4"/><path d="M5.5 7h13l-1.38-2.76A2 2 0 0 0 15.03 3H8.97a2 2 0 0 0-1.79 1.24L5.5 7z"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>
-            Pilih Foto
+            {form.foto.length < 3 ? 'Tambah Foto' : 'Maksimal 3 Foto'}
           </label>
-          <input id="foto" name="foto" type="file" accept="image/*" onChange={handleChange} required />
-          {fotoPreview && (
-            <img src={fotoPreview} alt="Preview" className="foto-preview" />
-          )}
+          <div className="foto-preview-row">
+            {fotoPreview.map((src, i) => (
+              <div key={i} style={{position:'relative', display:'inline-block', marginRight:12}}>
+                <img src={src} alt={`Preview ${i+1}`} className="foto-preview" />
+                <button
+                  type="button"
+                  onClick={() => removeFile(i)}
+                  style={{
+                    position: 'absolute',
+                    top: -12,
+                    right: -12,
+                    background: 'none',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 24,
+                    height: 24,
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    boxShadow: 'none',
+                    padding: 0,
+                    lineHeight: 1,
+                    fontSize: 20,
+                    zIndex: 2
+                  }}
+                  aria-label="Hapus foto"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
         <button
           type="submit"
