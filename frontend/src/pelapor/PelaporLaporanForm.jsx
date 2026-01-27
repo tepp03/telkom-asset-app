@@ -29,16 +29,19 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     'Toilet Wanita',
     'Area Luar Gedung'
   ];
-  const today = new Date();
-  const tanggalOptions = Array.from({length: 7}, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    return d.toISOString().slice(0,10);
-  });
+  // Tanggal hari ini otomatis (format YYYY-MM-DD untuk input type="date")
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [form, setForm] = useState({
     nama: '',
     unit: lokasiUnitOptions[0],
-    tanggal: tanggalOptions[0],
+    tanggal: getTodayDate(),
     aset: '',
     deskripsi: '',
     foto: null
@@ -52,6 +55,41 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [laporanId, setLaporanId] = useState('');
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  // Custom calendar helpers
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    return { daysInMonth, startingDayOfWeek, year, month };
+  };
+
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return 'Pilih Tanggal';
+    const [year, month, day] = dateStr.split('-');
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${parseInt(day)} ${monthNames[parseInt(month) - 1]} ${year}`;
+  };
+
+  const selectDate = (day) => {
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(day).padStart(2, '0');
+    const dateStr = `${year}-${month}-${dayStr}`;
+    setForm({ ...form, tanggal: dateStr });
+    setShowCalendar(false);
+  };
+
+  const changeMonth = (direction) => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(currentMonth.getMonth() + direction);
+    setCurrentMonth(newDate);
+  };
 
   const handleChange = e => {
     const { name, value, files } = e.target;
@@ -136,15 +174,56 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         </div>
         <div className="form-group tanggal">
           <label htmlFor="tanggal">Tanggal Kejadian</label>
-          <input
-            id="tanggal"
-            name="tanggal"
-            type="date"
-            value={form.tanggal}
-            onChange={handleChange}
-            required
-            className="modern-date-input"
-          />
+          <div className="custom-date-picker">
+            <div className="date-input-display" onClick={() => setShowCalendar(!showCalendar)}>
+              <span>{formatDisplayDate(form.tanggal)}</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            {showCalendar && (
+              <div className="calendar-popup">
+                <div className="calendar-header">
+                  <button type="button" onClick={() => changeMonth(-1)}>‹</button>
+                  <span>{currentMonth.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
+                  <button type="button" onClick={() => changeMonth(1)}>›</button>
+                </div>
+                <div className="calendar-weekdays">
+                  {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
+                    <div key={day} className="weekday">{day}</div>
+                  ))}
+                </div>
+                <div className="calendar-days">
+                  {(() => {
+                    const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
+                    const days = [];
+                    for (let i = 0; i < startingDayOfWeek; i++) {
+                      days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+                    }
+                    for (let day = 1; day <= daysInMonth; day++) {
+                      const isToday = day === new Date().getDate() && 
+                                      currentMonth.getMonth() === new Date().getMonth() &&
+                                      currentMonth.getFullYear() === new Date().getFullYear();
+                      const isSelected = form.tanggal === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                      days.push(
+                        <div 
+                          key={day} 
+                          className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                          onClick={() => selectDate(day)}
+                        >
+                          {day}
+                        </div>
+                      );
+                    }
+                    return days;
+                  })()}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="form-group aset">
           <label htmlFor="aset">Nama Aset</label>

@@ -261,11 +261,15 @@ function DetailLaporan() {
   })();
 
   const handlePrevImage = () => {
-    setActiveImageIndex((prev) => (prev === 0 ? imageSources.length - 1 : prev - 1));
+    if (activeImageIndex > 0) {
+      setActiveImageIndex(activeImageIndex - 1);
+    }
   };
 
   const handleNextImage = () => {
-    setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
+    if (activeImageIndex < imageSources.length - 1) {
+      setActiveImageIndex(activeImageIndex + 1);
+    }
   };
 
   const handleDelete = () => {
