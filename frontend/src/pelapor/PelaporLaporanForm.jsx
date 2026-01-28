@@ -8,21 +8,10 @@ const WA_MESSAGE = encodeURIComponent('Halo Admin, saya ingin bertanya tentang l
 
 const PelaporLaporanForm = ({ onSuccess }) => {
   const lokasiUnitOptions = [
-    'Lantai 1 - Front Office',
-    'Lantai 1 - Customer Service',
-    'Lantai 2 - Ruang Rapat',
-    'Lantai 2 - Kantor Manager',
-    'Lantai 3 - IT Support',
-    'Lantai 3 - Gudang',
-    'Lantai 4 - Pantry',
-    'Lantai 4 - Ruang Meeting',
-    'Basement - Parkir',
-    'Lobby Utama',
-    'Ruang Server',
-    'Kantin',
-    'Toilet Pria',
-    'Toilet Wanita',
-    'Area Luar Gedung'
+    'BS (Business Service)',
+    'LGS (Local Government Service)',
+    'PRQ (Performance, Risk & Quality)',
+    'SSGS (Shared Service General Support)'
   ];
   const today = new Date();
   const tanggalOptions = Array.from({length: 7}, (_, i) => {
@@ -74,6 +63,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [laporanId, setLaporanId] = useState('');
+  const [popupFade, setPopupFade] = useState(false);
 
   const handleChange = e => {
     const { name, value, files } = e.target;
@@ -109,6 +99,8 @@ const PelaporLaporanForm = ({ onSuccess }) => {
       setForm({ nama: '', unit: lokasiUnitOptions[0], tanggal: tanggalOptions[0], aset: '', deskripsi: '', foto: [] });
       setLaporanId(result.laporan.id);
       setShowPopup(true);
+      setPopupFade(false);
+      setTimeout(() => setPopupFade(true), 2200);
       setTimeout(() => setShowPopup(false), 3000);
       fetchLaporan();
       if (onSuccess) onSuccess();
@@ -139,8 +131,8 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     <>
       <Navbar />
       {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-modal">
+        <div className={"popup-overlay" + (popupFade ? " fade-out" : "") }>
+          <div className={"popup-modal" + (popupFade ? " fade-out" : "") }>
             <div className="popup-content-row">
               <span className="popup-icon" style={{background: '#1fa84b'}}>
                 {/* Simple checkmark icon only */}
@@ -200,7 +192,17 @@ const PelaporLaporanForm = ({ onSuccess }) => {
           />
         </div>
         <div className="form-group foto">
-          <label htmlFor="foto">Foto Bukti (maksimal 3)</label>
+          <label htmlFor="foto" style={{ display: 'flex', alignItems: 'center' }}>
+            Foto Bukti (maksimal 3)
+            {form.foto.length > 0 && (
+              <span style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center' }} aria-label="Sudah terisi">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="10" cy="10" r="10" fill="#1fa84b"/>
+                  <path d="M6 10.5L9 13.5L14 8.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            )}
+          </label>
           <input
             type="file"
             accept="image/*"
@@ -214,38 +216,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e00000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="4"/><path d="M5.5 7h13l-1.38-2.76A2 2 0 0 0 15.03 3H8.97a2 2 0 0 0-1.79 1.24L5.5 7z"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>
             {form.foto.length < 3 ? 'Tambah Foto' : 'Maksimal 3 Foto'}
           </label>
-          <div className="foto-preview-row">
-            {fotoPreview.map((src, i) => (
-              <div key={i} style={{position:'relative', display:'inline-block', marginRight:12}}>
-                <img src={src} alt={`Preview ${i+1}`} className="foto-preview" />
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  style={{
-                    position: 'absolute',
-                    top: -12,
-                    right: -12,
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: 24,
-                    height: 24,
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    color: '#fff',
-                    boxShadow: 'none',
-                    padding: 0,
-                    lineHeight: 1,
-                    fontSize: 20,
-                    zIndex: 2
-                  }}
-                  aria-label="Hapus foto"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
+          {/* Foto preview dihilangkan sesuai permintaan */}
         </div>
         <button
           type="submit"

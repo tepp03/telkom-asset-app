@@ -1,3 +1,11 @@
+/* Fade out animation for popup */
+.fade-out {
+  animation: fadeOut 0.8s forwards;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; pointer-events: none; }
+}
 .popup-content-row {
   display: flex;
   flex-direction: row;
@@ -632,6 +640,9 @@ html.pelapor-bg, body.pelapor-bg {
 }
 .floating-wa-btn:hover {
   background: #1ebe57;
+  box-shadow: 0 4px 18px rgba(40, 167, 69, 0.18), 0 1.5px 6px rgba(0,0,0,0.13);
+  transform: scale(1.04);
+  transition: background 0.28s, box-shadow 0.28s, transform 0.28s cubic-bezier(.4,1.2,.6,1);
 }
 .floating-inbox-btn {
   position: fixed;
@@ -656,6 +667,9 @@ html.pelapor-bg, body.pelapor-bg {
 }
 .floating-inbox-btn:hover {
   background: #b80000;
+  box-shadow: 0 4px 18px rgba(224, 0, 0, 0.18), 0 1.5px 6px rgba(0,0,0,0.13);
+  transform: scale(1.04);
+  transition: background 0.28s, box-shadow 0.28s, transform 0.28s cubic-bezier(.4,1.2,.6,1);
 }
 @media (max-width: 600px) {
   .floating-wa-btn, .floating-inbox-btn {
