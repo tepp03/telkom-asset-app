@@ -223,8 +223,17 @@ export default function TeknisiLaporanDetail() {
     });
   };
 
-  const handlePrevImage = () => setActiveImageIndex((prev) => (prev === 0 ? imageSources.length - 1 : prev - 1));
-  const handleNextImage = () => setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
+  const handlePrevImage = () => {
+    if (activeImageIndex > 0) {
+      setActiveImageIndex(activeImageIndex - 1);
+    }
+  };
+  
+  const handleNextImage = () => {
+    if (activeImageIndex < imageSources.length - 1) {
+      setActiveImageIndex(activeImageIndex + 1);
+    }
+  };
 
   return (
     <div className="detail-page">
