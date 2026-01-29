@@ -85,6 +85,13 @@ async function init() {
   password_changed_at INTEGER DEFAULT 0
 )`);
 
+  await run(db, `CREATE TABLE IF NOT EXISTS pelapor (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  bound_unit TEXT NOT NULL,
+  password_changed_at INTEGER DEFAULT 0
+)`);
 
   const existing = await get(db, 'SELECT COUNT(1) as c FROM admins');
   if (!existing || existing.c === 0) {
@@ -98,6 +105,22 @@ async function init() {
     await run(db, 'INSERT INTO teknisi (username, password_hash) VALUES (?, ?)', ['teknisi', passwordHash]);
 }
 
+  // Seed 4 pelapor accounts
+  const existingPelapor = await get(db, 'SELECT COUNT(1) as c FROM pelapor');
+  if (!existingPelapor || existingPelapor.c === 0) {
+    const pelaporAccounts = [
+      { username: 'pelapor1', password: 'Pelapor1@2026!', bound_unit: 'Business Service' },
+      { username: 'pelapor2', password: 'Pelapor2@2026!', bound_unit: 'Local Government Service' },
+      { username: 'pelapor3', password: 'Pelapor3@2026!', bound_unit: 'Performance, Risk & Quality' },
+      { username: 'pelapor4', password: 'Pelapor4@2026!', bound_unit: 'Shared Service & General Support' }
+    ];
+
+    for (const account of pelaporAccounts) {
+      const passwordHash = bcrypt.hashSync(account.password, 12);
+      await run(db, 'INSERT INTO pelapor (username, password_hash, bound_unit) VALUES (?, ?, ?)', 
+        [account.username, passwordHash, account.bound_unit]);
+    }
+  }
 
   const countReports = await get(db, 'SELECT COUNT(1) as c FROM reports');
   if (!countReports || countReports.c === 0) {
@@ -163,6 +186,11 @@ async function getTeknisiByUsername(username) {
   const db = openDb();
   return await get(db, 'SELECT * FROM teknisi WHERE username = ?', [username]);
 }
+
+async function getPelaporByUsername(username) {
+  const db = openDb();
+  return await get(db, 'SELECT * FROM pelapor WHERE username = ?', [username]);
+}
   
 
 module.exports = {
@@ -170,6 +198,7 @@ module.exports = {
   openDb,
   getAdminByUsername,
   getTeknisiByUsername,
+  getPelaporByUsername,
   // helpers for reports
   listReports: () => {
     const db = openDb();
