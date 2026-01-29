@@ -1,3 +1,40 @@
+/* Fade out animation for popup */
+.fade-out {
+  animation: fadeOut 0.8s forwards;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; pointer-events: none; }
+}
+.popup-content-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 56px;
+}
+
+.popup-texts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+}
+.popup-texts h3, .popup-texts p {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+/* Preview foto berdampingan */
+.foto-preview-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
 html, body, #root, #app, .pelapor-bg, .pelapor-daftar-page {
   background: #fff !important;
   min-height: 100vh !important;
@@ -101,10 +138,23 @@ html.pelapor-bg, body.pelapor-bg {
 
 /* Styling untuk dropdown options */
 .pelapor-laporan-form select option {
-  background: #ffffff;
-  color: #333333;
-  padding: 10px;
-  font-weight: 500;
+  background: #fff;
+  color: #b30000;
+  font-weight: 600;
+  font-size: 1.04rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 4px 0;
+  transition: background 0.18s, color 0.18s;
+}
+.pelapor-laporan-form select option:checked,
+.pelapor-laporan-form select option:focus {
+  background: #ffe5ea;
+  color: #e00000;
+}
+.pelapor-laporan-form select option:hover {
+  background: #fff0f3;
+  color: #b30000;
 }
 
 .pelapor-laporan-form select {
@@ -207,23 +257,84 @@ html.pelapor-bg, body.pelapor-bg {
   pointer-events: none;
 }
 
+
 .popup-modal {
   position: fixed;
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(40, 167, 69, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
-  padding: 16px 24px;
-  max-width: 320px;
+  background: rgba(31, 168, 75, 0.80); /* less transparent, more solid */
+  backdrop-filter: blur(18px) saturate(180%) brightness(1.18) contrast(1.10);
+  -webkit-backdrop-filter: blur(18px) saturate(180%) brightness(1.18) contrast(1.10);
+  border: 1.5px solid rgba(80, 255, 180, 0.25);
+  border-radius: 22px;
+  padding: 22px 32px 18px 32px;
+  max-width: 340px;
   width: auto;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 1.5px 0 rgba(255,255,255,0.18) inset;
+  animation: glassPop 0.35s cubic-bezier(.4,1.6,.6,1) both;
   pointer-events: auto;
+  overflow: hidden;
+}
+
+@keykey glassPop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.95) translateY(-20px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px auto;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #4be87a 60%, #1fa84b 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 12px 0 rgba(40,167,69,0.18);
+  color: #fff;
+  border: 2.5px solid rgba(255,255,255,0.25);
+  margin-bottom: 10px;
+  position: relative;
+}
+.popup-icon svg {
+  display: block;
+  margin: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.popup-modal h3 {
+  color: #eaffea;
+  font-size: 1.18rem;
+  font-weight: 800;
+  margin: 0 0 2px 0;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(40,167,69,0.10);
+}
+
+.popup-modal p {
+  color: #eaffea;
+  font-size: 0.98rem;
+  margin: 8px 0 0 0;
+  letter-spacing: 0.2px;
+}
+
+.popup-modal p strong {
+  color: #baffc9;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
 .popup-icon {
@@ -550,7 +661,7 @@ html.pelapor-bg, body.pelapor-bg {
   gap: 4px;
 }
 .form-group label {
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 800;
   color: #fff;
   margin-bottom: 2px;
@@ -584,7 +695,7 @@ html.pelapor-bg, body.pelapor-bg {
 }
 
 /* Kolom kanan */
-.pelapor-laporan-form .form-group.deskripsi,
+.pelapor-laporan-form .formgroup.deskripsi,
 .pelapor-laporan-form .form-group.foto {
   grid-column: 2 / 3;
 }
@@ -646,17 +757,29 @@ html.pelapor-bg, body.pelapor-bg {
 .pelapor-laporan-form .custom-file-label {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: #fff;
   color: #e00000;
   font-weight: 700;
   border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 8px 22px;
+  font-size: 1rem;
   cursor: pointer;
   border: 2px solid #e00000;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  min-width: 140px;
+  max-width: 220px;
+  width: fit-content;
+  justify-content: center;
+}
+
+.pelapor-laporan-form .custom-file-label svg {
+  font-size: 1rem;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: middle;
 }
 .pelapor-laporan-form .custom-file-label:hover,
 .pelapor-laporan-form .custom-file-label:focus {
@@ -713,6 +836,9 @@ html.pelapor-bg, body.pelapor-bg {
 }
 .floating-wa-btn:hover {
   background: #1ebe57;
+  box-shadow: 0 4px 18px rgba(40, 167, 69, 0.18), 0 1.5px 6px rgba(0,0,0,0.13);
+  transform: scale(1.04);
+  transition: background 0.28s, box-shadow 0.28s, transform 0.28s cubic-bezier(.4,1.2,.6,1);
 }
 .floating-inbox-btn {
   position: fixed;
@@ -737,6 +863,9 @@ html.pelapor-bg, body.pelapor-bg {
 }
 .floating-inbox-btn:hover {
   background: #b80000;
+  box-shadow: 0 4px 18px rgba(224, 0, 0, 0.18), 0 1.5px 6px rgba(0,0,0,0.13);
+  transform: scale(1.04);
+  transition: background 0.28s, box-shadow 0.28s, transform 0.28s cubic-bezier(.4,1.2,.6,1);
 }
 @media (max-width: 600px) {
   .floating-wa-btn, .floating-inbox-btn {

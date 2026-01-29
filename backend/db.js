@@ -109,10 +109,10 @@ async function init() {
   const existingPelapor = await get(db, 'SELECT COUNT(1) as c FROM pelapor');
   if (!existingPelapor || existingPelapor.c === 0) {
     const pelaporAccounts = [
-      { username: 'pelapor1', password: 'Pelapor1@2026!', bound_unit: 'Business Service' },
-      { username: 'pelapor2', password: 'Pelapor2@2026!', bound_unit: 'Local Government Service' },
-      { username: 'pelapor3', password: 'Pelapor3@2026!', bound_unit: 'Performance, Risk & Quality' },
-      { username: 'pelapor4', password: 'Pelapor4@2026!', bound_unit: 'Shared Service & General Support' }
+      { username: 'pelapor1', password: 'Pelapor1@2026!', bound_unit: 'BS (Business Service)' },
+      { username: 'pelapor2', password: 'Pelapor2@2026!', bound_unit: 'LGS (Local Government Service)' },
+      { username: 'pelapor3', password: 'Pelapor3@2026!', bound_unit: 'PRQ (Performance, Risk & Quality)' },
+      { username: 'pelapor4', password: 'Pelapor4@2026!', bound_unit: 'SSGS (Shared Service General Support)' }
     ];
 
     for (const account of pelaporAccounts) {
@@ -122,58 +122,7 @@ async function init() {
     }
   }
 
-  const countReports = await get(db, 'SELECT COUNT(1) as c FROM reports');
-  if (!countReports || countReports.c === 0) {
-    const reports = [
-      // Shared Service & General Support (SSGS)
-      { unit: 'Shared Service & General Support', code: 'SSGS', num: 1, nama: 'Shafwan Raihan', barang: 'Atap', tanggal: '01/08/24', deskripsi: 'Atap bocor di ruang rapat', status: 'Done' },
-      { unit: 'Shared Service & General Support', code: 'SSGS', num: 2, nama: 'Ahmad Subagyo', barang: 'AC', tanggal: '05/08/24', deskripsi: 'AC tidak dingin, butuh service', status: 'Done' },
-      { unit: 'Shared Service & General Support', code: 'SSGS', num: 3, nama: 'Rina Kusuma', barang: 'Kursi', tanggal: '08/08/24', deskripsi: 'Kursi kantor hilang dari ruang meeting', status: 'In Progress' },
-      { unit: 'Shared Service & General Support', code: 'SSGS', num: 4, nama: 'Budi Santoso', barang: 'Lampu', tanggal: '10/08/24', deskripsi: 'Lampu neon mati tidak menyala', status: 'In Progress' },
-      { unit: 'Shared Service & General Support', code: 'SSGS', num: 5, nama: 'Shafwan Raihan', barang: 'Pintu', tanggal: '12/08/24', deskripsi: 'Pintu ruang server susah ditutup', status: 'To-Do' },
-      { unit: 'Shared Service & General Support', code: 'SSGS', num: 6, nama: 'Ahmad Subagyo', barang: 'Kabel', tanggal: '15/08/24', deskripsi: 'Kabel HDMI hilang dari ruang presentasi', status: 'To-Do' },
-      
-      // IT Department (ITD)
-      { unit: 'IT Department', code: 'ITD', num: 1, nama: 'Rina Kusuma', barang: 'Komputer', tanggal: '02/08/24', deskripsi: 'Komputer tidak bisa booting, layar hitam', status: 'Done' },
-      { unit: 'IT Department', code: 'ITD', num: 2, nama: 'Budi Santoso', barang: 'Printer', tanggal: '06/08/24', deskripsi: 'Printer paper jam terus menerus', status: 'In Progress' },
-      { unit: 'IT Department', code: 'ITD', num: 3, nama: 'Shafwan Raihan', barang: 'Mouse', tanggal: '09/08/24', deskripsi: 'Mouse wireless tidak konek', status: 'In Progress' },
-      { unit: 'IT Department', code: 'ITD', num: 4, nama: 'Ahmad Subagyo', barang: 'Keyboard', tanggal: '13/08/24', deskripsi: 'Keyboard mechanical hilang dari meja', status: 'To-Do' },
-      { unit: 'IT Department', code: 'ITD', num: 5, nama: 'Rina Kusuma', barang: 'Monitor', tanggal: '16/08/24', deskripsi: 'Monitor bergaris, layar rusak', status: 'To-Do' },
-      { unit: 'IT Department', code: 'ITD', num: 6, nama: 'Budi Santoso', barang: 'UPS', tanggal: '18/08/24', deskripsi: 'UPS bunyi beep terus, baterai drop', status: 'To-Do' },
-      
-      // Finance (FIN)
-      { unit: 'Finance', code: 'FIN', num: 1, nama: 'Shafwan Raihan', barang: 'Meja', tanggal: '03/08/24', deskripsi: 'Meja kerja kakinya patah', status: 'Done' },
-      { unit: 'Finance', code: 'FIN', num: 2, nama: 'Ahmad Subagyo', barang: 'Kursi', tanggal: '07/08/24', deskripsi: 'Kursi roda macet tidak bisa berputar', status: 'In Progress' },
-      { unit: 'Finance', code: 'FIN', num: 3, nama: 'Rina Kusuma', barang: 'Kalkulator', tanggal: '11/08/24', deskripsi: 'Kalkulator mati, baterai habis', status: 'In Progress' },
-      { unit: 'Finance', code: 'FIN', num: 4, nama: 'Budi Santoso', barang: 'Stapler', tanggal: '14/08/24', deskripsi: 'Stapler besar hilang dari meja kasir', status: 'To-Do' },
-      { unit: 'Finance', code: 'FIN', num: 5, nama: 'Shafwan Raihan', barang: 'Lemari', tanggal: '17/08/24', deskripsi: 'Lemari arsip pintu patah', status: 'To-Do' },
-      
-      // HR (HRD)
-      { unit: 'HR', code: 'HRD', num: 1, nama: 'Ahmad Subagyo', barang: 'AC', tanggal: '04/08/24', deskripsi: 'AC bocor menetes air', status: 'Done' },
-      { unit: 'HR', code: 'HRD', num: 2, nama: 'Rina Kusuma', barang: 'Telepon', tanggal: '08/08/24', deskripsi: 'Telepon kantor suara tidak jelas', status: 'In Progress' },
-      { unit: 'HR', code: 'HRD', num: 3, nama: 'Budi Santoso', barang: 'Whiteboard Marker', tanggal: '12/08/24', deskripsi: 'Marker whiteboard set lengkap hilang', status: 'To-Do' },
-      { unit: 'HR', code: 'HRD', num: 4, nama: 'Shafwan Raihan', barang: 'Proyektor', tanggal: '15/08/24', deskripsi: 'Proyektor tidak fokus, gambar blur', status: 'To-Do' },
-      { unit: 'HR', code: 'HRD', num: 5, nama: 'Ahmad Subagyo', barang: 'Scanner', tanggal: '19/08/24', deskripsi: 'Scanner tidak terdeteksi komputer', status: 'To-Do' }
-    ];
 
-    for (const r of reports) {
-      const id = `${r.code}${r.num.toString().padStart(3, '0')}`;
-      // Generate dummy image URL based on report type
-      const dummyImages = [
-        'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop'
-      ];
-      const randomImage = dummyImages[Math.floor(Math.random() * dummyImages.length)];
-      await run(db,
-        'INSERT INTO reports (id, email_pelapor, nama_barang, tanggal, unit, deskripsi, image_url, status) VALUES (?,?,?,?,?,?,?,?)',
-        [id, r.nama, r.barang, r.tanggal, r.unit, r.deskripsi, randomImage, r.status]
-      );
-    }
-
-  }
   return db;
 }
 

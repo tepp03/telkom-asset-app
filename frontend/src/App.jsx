@@ -103,7 +103,7 @@ function App() {
               ? userRole === 'teknisi'
                 ? <Navigate to="/teknisi/laporan-aset" replace />
                 : userRole === 'pelapor'
-                  ? <Navigate to="/pelapor/inbox" replace />
+                  ? <Navigate to="/pelapor/buat-laporan" replace />
                   : <Navigate to="/laporan-aset" replace />
               : <Navigate to="/login" replace />
           }
@@ -117,7 +117,7 @@ function App() {
               ? userRole === 'teknisi'
                 ? <Navigate to="/teknisi/laporan-aset" replace />
                 : userRole === 'pelapor'
-                  ? <Navigate to="/pelapor/inbox" replace />
+                  ? <Navigate to="/pelapor/buat-laporan" replace />
                   : <Navigate to="/laporan-aset" replace />
               : <Login setAuth={setIsAuthenticated} setRole={setUserRole} />
           }
@@ -128,22 +128,22 @@ function App() {
           path="/pelapor/login"
           element={<Navigate to="/login" replace />}
         />
-        {/* Pelapor dashboard utama: form + tombol ke inbox */}
-        <Route
-          path="/pelapor/inbox"
-          element={
-            isAuthenticated && userRole === 'pelapor'
-              ? <PelaporLaporanForm />
-              : <Navigate to="/pelapor/login" replace />
-          }
-        />
-        {/* Pelapor daftar laporan */}
+        {/* Pelapor daftar laporan (inbox) */}
         <Route
           path="/pelapor/daftar-laporan"
           element={
             isAuthenticated && userRole === 'pelapor'
               ? <PelaporDaftarLaporan />
-              : <Navigate to="/pelapor/login" replace />
+              : <Navigate to="/login" replace />
+          }
+        />
+        {/* Pelapor form buat laporan baru */}
+        <Route
+          path="/pelapor/buat-laporan"
+          element={
+            isAuthenticated && userRole === 'pelapor'
+              ? <PelaporLaporanForm />
+              : <Navigate to="/login" replace />
           }
         />
         {/* Pelapor detail laporan */}
@@ -152,7 +152,7 @@ function App() {
           element={
             isAuthenticated && userRole === 'pelapor'
               ? <PelaporDetailLaporan />
-              : <Navigate to="/pelapor/login" replace />
+              : <Navigate to="/login" replace />
           }
         />
 
@@ -163,7 +163,7 @@ function App() {
             isAuthenticated && userRole === 'admin'
               ? <LaporanAset />
               : isAuthenticated
-                ? <Navigate to={userRole === 'teknisi' ? "/teknisi/laporan-aset" : userRole === 'pelapor' ? "/pelapor/inbox" : "/login"} replace />
+                ? <Navigate to={userRole === 'teknisi' ? "/teknisi/laporan-aset" : userRole === 'pelapor' ? "/pelapor/daftar-laporan" : "/login"} replace />
                 : <Navigate to="/login" />
           }
         />
@@ -174,7 +174,7 @@ function App() {
             isAuthenticated && userRole === 'admin'
               ? <DetailLaporan />
               : isAuthenticated
-                ? <Navigate to={userRole === 'teknisi' ? "/teknisi/laporan-aset" : userRole === 'pelapor' ? "/pelapor/inbox" : "/login"} replace />
+                ? <Navigate to={userRole === 'teknisi' ? "/teknisi/laporan-aset" : userRole === 'pelapor' ? "/pelapor/daftar-laporan" : "/login"} replace />
                 : <Navigate to="/login" />
           }
         />
@@ -186,7 +186,7 @@ function App() {
             isAuthenticated && userRole === 'teknisi'
               ? <TeknisiLaporanAset />
               : isAuthenticated
-                ? <Navigate to={userRole === 'admin' ? "/laporan-aset" : userRole === 'pelapor' ? "/pelapor/inbox" : "/login"} replace />
+                ? <Navigate to={userRole === 'admin' ? "/laporan-aset" : userRole === 'pelapor' ? "/pelapor/daftar-laporan" : "/login"} replace />
                 : <Navigate to="/login" />
           }
         />
@@ -197,7 +197,7 @@ function App() {
             isAuthenticated && userRole === 'teknisi'
               ? <TeknisiLaporanDetail />
               : isAuthenticated
-                ? <Navigate to={userRole === 'admin' ? "/laporan-aset" : userRole === 'pelapor' ? "/pelapor/inbox" : "/login"} replace />
+                ? <Navigate to={userRole === 'admin' ? "/laporan-aset" : userRole === 'pelapor' ? "/pelapor/daftar-laporan" : "/login"} replace />
                 : <Navigate to="/login" />
           }
         />

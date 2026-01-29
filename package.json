@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev": "concurrently \"npm --prefix backend run dev\" \"timeout /t 2 /nobreak >nul & npm --prefix frontend run dev\"",
     "start": "concurrently \"npm --prefix backend start\" \"npm --prefix frontend run preview\"",
     "frontend:dev": "npm --prefix frontend run dev",
     "backend:dev": "npm --prefix backend run dev",

@@ -89,16 +89,25 @@ function Login({ setAuth, setRole }) {
                     if (!res.ok) {
                       throw new Error(data?.error || 'Login gagal');
                     }
+                    console.log('Login response:', data);
                     const role = data.user?.role;
-                    if (role !== 'admin' && role !== 'teknisi') {
+                    if (role !== 'admin' && role !== 'teknisi' && role !== 'pelapor') {
                       throw new Error('Role tidak valid. Hubungi admin.');
                     }
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userName', username);
                     localStorage.setItem('role', role);
+                    
+                    // Store bound_unit untuk pelapor
+                    if (role === 'pelapor' && data.user.bound_unit) {
+                      console.log('Saving bound_unit:', data.user.bound_unit);
+                      localStorage.setItem('bound_unit', data.user.bound_unit);
+                    }
+                    
                     if (setAuth) setAuth(true);
                     if (setRole) setRole(role);
                     if (role === 'teknisi') navigate('/teknisi/laporan-aset');
+                    else if (role === 'pelapor') navigate('/pelapor/buat-laporan');
                     else navigate('/laporan-aset');
                   } catch (err) {
                     setError(err.message);

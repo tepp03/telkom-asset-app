@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Upload files (user-generated, environment-specific)
+backend/data/uploads/
+backend/data/app.db
+backend/data/app.sqlite
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

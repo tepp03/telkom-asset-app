@@ -26,13 +26,30 @@ function PelaporDaftarLaporan() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  // Custom back: jika user tekan back dari daftar laporan, langsung ke form laporan tanpa melewati page lain
+  useEffect(() => {
+    // Ganti state history agar daftar-laporan jadi root, tidak ada page penghalang
+    window.history.replaceState({ daftarLaporan: true }, '', window.location.href);
+    const handlePopState = (e) => {
+      // Selalu arahkan ke form laporan jika user tekan back dari daftar laporan
+      if (window.location.pathname === '/pelapor/daftar-laporan') {
+        navigate('/pelapor/form-laporan', { replace: true });
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [navigate]);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        
         const url = '/api/pelapor/laporan';
-        const res = await fetch(url);
+        const res = await fetch(url, { headers });
         if (!res.ok) {
           setError('Gagal memuat data laporan');
           setLoading(false);
@@ -47,7 +64,7 @@ function PelaporDaftarLaporan() {
     })();
   }, []);
 
-  // Filter items berdasarkan search dan status
+  // Filter items: search dan status, urutan backend (ASC)
   const filteredItems = items.filter(item => {
     const term = searchTerm.toLowerCase();
     const match =
@@ -93,7 +110,10 @@ function PelaporDaftarLaporan() {
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
-                  <tr key={item.id} onClick={() => navigate(`/pelapor/laporan/${item.id}`)} style={{cursor: 'pointer'}}>
+                  <tr key={item.id} onClick={e => {
+                    e.preventDefault();
+                    window.open(`/pelapor/laporan/${item.id}`, '_blank');
+                  }} style={{cursor: 'pointer'}}>
                     <td>
                       <span className="table-code">{item.id}</span>
                     </td>

@@ -3,7 +3,7 @@ const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
 module.exports = session({
-  store: new SQLiteStore({ db: 'sessions.db', dir: './data' }),
+  store: new SQLiteStore({ db: 'sessions.sqlite', dir: './data' }),
   secret: process.env.SESSION_SECRET || 'supersecretkeyyangpanjangbanget',
   resave: false,
   saveUninitialized: false,

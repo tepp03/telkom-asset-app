@@ -135,21 +135,22 @@ export default function TeknisiLaporanDetail() {
   })();
 
   const handleFileChange = async (e) => {
-    const selectedFiles = e.target.files;
+    const selectedFiles = Array.from(e.target.files);
     if (!selectedFiles || selectedFiles.length === 0) return;
-    
     setError('');
-    setFiles(selectedFiles);
-    
+    // Gabungkan file lama (files) dan baru, urutkan agar yang lama tetap di depan
+    let newFiles = Array.from(files).concat(selectedFiles);
+    // Hanya ambil maksimal 3 file pertama (yang paling lama)
+    newFiles = newFiles.slice(0, 3);
+    setFiles(newFiles);
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
         return;
       }
-      
       const form = new FormData();
-      Array.from(selectedFiles).slice(0,3).forEach(f => form.append('images', f));
+      newFiles.forEach(f => form.append('images', f));
       setUploading(true);
       const res = await fetch(`/api/teknisi/reports/${id}/images`, {
         method: 'POST',
@@ -170,7 +171,6 @@ export default function TeknisiLaporanDetail() {
       const data = await res.json();
       const [u1, u2, u3] = data.urls || [];
       setReport({ ...report, image_url: u1 || report?.image_url, image_url2: u2 || report?.image_url2, image_url3: u3 || report?.image_url3 });
-      
       // Reset input file
       e.target.value = '';
     } catch (_) {
