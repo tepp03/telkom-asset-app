@@ -44,12 +44,8 @@ function PelaporDaftarLaporan() {
     (async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        
         const url = '/api/pelapor/laporan';
-        const res = await fetch(url, { headers });
+        const res = await fetch(url);
         if (!res.ok) {
           setError('Gagal memuat data laporan');
           setLoading(false);

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { getAdminByUsername, getTeknisiByUsername, getPelaporByUsername } = require('../db');
+const { getAdminByUsername, getTeknisiByUsername } = require('../db');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -30,8 +30,6 @@ async function authenticateToken(req, res, next) {
       user = await getAdminByUsername(payload.sub);
     } else if (payload.role === 'teknisi') {
       user = await getTeknisiByUsername(payload.sub);
-    } else if (payload.role === 'pelapor') {
-      user = await getPelaporByUsername(payload.sub);
     }
     
     if (user && user.password_changed_at) {
@@ -48,11 +46,6 @@ async function authenticateToken(req, res, next) {
       username: payload.sub,
       role: payload.role
     };
-    
-    // Add bound_unit for pelapor
-    if (payload.role === 'pelapor' && payload.bound_unit) {
-      req.user.bound_unit = payload.bound_unit;
-    }
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {

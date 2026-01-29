@@ -30,18 +30,7 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
     // Deteksi role dari localStorage atau path
     const role = localStorage.getItem('role');
     if (role === 'pelapor') {
-      // Ambil bound_unit dan ekstrak singkatan (BS, LGS, PRQ, SSGS)
-      const boundUnit = localStorage.getItem('bound_unit') || '';
-      console.log('Bound Unit from localStorage:', boundUnit);
-      
-      // Ekstrak singkatan dari bound_unit seperti "BS (Business Service)" -> "BS"
-      if (boundUnit) {
-        const shortCode = boundUnit.split(' ')[0]; // Ambil bagian pertama sebelum spasi
-        console.log('Extracted short code:', shortCode);
-        setRoleLabel(shortCode);
-      } else {
-        setRoleLabel('Pelapor');
-      }
+      setRoleLabel('Pelapor');
       return;
     }
     const token = localStorage.getItem('token');
@@ -65,7 +54,6 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
     localStorage.removeItem('token');
     localStorage.removeItem('userName');
     localStorage.removeItem('role');
-    localStorage.removeItem('bound_unit');
     
     // Hard redirect ke login dengan reload
     window.location.href = '/login';

@@ -31,22 +31,26 @@ const upload = multer({ storage });
 
 const { openDb } = require('../../db');
 
-// Mapping unit/lokasi ke kode singkat berdasarkan unit yang digunakan dalam sistem
+// Mapping unit/lokasi ke kode singkat
 const unitCodeMap = {
-  // Pelapor units (dari bound_unit)
-  'BS (Business Service)': 'BS',
-  'LGS (Local Government Service)': 'LGS',
-  'PRQ (Performance, Risk & Quality)': 'PRQ',
-  'SSGS (Shared Service General Support)': 'SSGS',
-  
-  // Legacy units (jika masih digunakan)
-  'Finance': 'FIN',
-  'HR': 'HRD',
-  'IT Department': 'ITD',
-  'Shared Service & General Support': 'SSGS'
+  'Lantai 1 - Front Office': 'FO',
+  'Lantai 1 - Customer Service': 'CS',
+  'Lantai 2 - Ruang Rapat': 'RR',
+  'Lantai 2 - Kantor Manager': 'KM',
+  'Lantai 3 - IT Support': 'IT',
+  'Lantai 3 - Gudang': 'GD',
+  'Lantai 4 - Pantry': 'PT',
+  'Lantai 4 - Ruang Meeting': 'RM',
+  'Basement - Parkir': 'BP',
+  'Lobby Utama': 'LB',
+  'Ruang Server': 'SV',
+  'Kantin': 'KT',
+  'Toilet Pria': 'TP',
+  'Toilet Wanita': 'TW',
+  'Area Luar Gedung': 'AG'
 };
 
-// Fungsi untuk generate ID berdasarkan unit dengan nomor urut (format: UNITCODE001, UNITCODE002, dll)
+// Fungsi untuk generate ID berdasarkan unit dengan nomor urut
 async function generateReportId(unit) {
   const db = openDb();
   const code = unitCodeMap[unit] || 'LR'; // Default LR jika unit tidak dikenali
@@ -55,7 +59,7 @@ async function generateReportId(unit) {
   const result = await new Promise((resolve, reject) => {
     db.get(
       'SELECT COUNT(*) as count FROM reports WHERE id LIKE ?',
-      [`${code}%`],
+      [`${code}-%`],
       (err, row) => {
         if (err) return reject(err);
         resolve(row ? row.count : 0);
@@ -65,7 +69,7 @@ async function generateReportId(unit) {
   
   const nextNumber = result + 1;
   const paddedNumber = String(nextNumber).padStart(3, '0');
-  return `${code}${paddedNumber}`; // Format: BS001, LGS001, FIN001, dll
+  return `${code}-${paddedNumber}`;
 }
 
 // POST /api/pelapor/laporan - tambah laporan ke DB (max 3 foto)
@@ -101,7 +105,7 @@ router.post('/laporan', pelaporLimiter, upload.array('foto', 3), async (req, res
 // GET /api/pelapor/laporan - list laporan dari DB
 router.get('/laporan', async (req, res) => {
   const db = openDb();
-  db.all('SELECT * FROM reports ORDER BY id ASC', [], (err, rows) => {
+  db.all('SELECT * FROM reports ORDER BY created_at ASC, id ASC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Gagal mengambil data laporan' });
     // Map agar frontend tetap dapat field yang diharapkan
     const mapped = rows.map(r => ({

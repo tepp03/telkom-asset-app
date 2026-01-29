@@ -7,11 +7,13 @@ const WA_ADMIN = '6285195003001'; // Nomor: 0851-9500-3001
 const WA_MESSAGE = encodeURIComponent('Halo Admin, saya ingin bertanya tentang laporan pengaduan.');
 
 const PelaporLaporanForm = ({ onSuccess }) => {
-  // Get bound_unit dari localStorage (sudah di-set saat login)
-  const boundUnit = localStorage.getItem('bound_unit') || 'BS (Business Service)';
-  const [showFloatingMenu, setShowFloatingMenu] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  
+  const lokasiUnitOptions = [
+    'BS (Business Service)',
+    'LGS (Local Government Service)',
+    'PRQ (Performance, Risk & Quality)',
+    'SSGS (Shared Service General Support)'
+  ];
+  // Tanggal hari ini otomatis (format YYYY-MM-DD untuk input type="date")
   const getTodayDate = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -22,7 +24,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
 
   const [form, setForm] = useState({
     nama: '',
-    unit: boundUnit,
+    unit: lokasiUnitOptions[0],
     tanggal: getTodayDate(),
     aset: '',
     deskripsi: '',
@@ -30,12 +32,6 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   });
 
   const [fotoPreview, setFotoPreview] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showPopup, setShowPopup] = useState(false);
-  const [laporanId, setLaporanId] = useState('');
-  const [laporan, setLaporan] = useState([]);
-  const [loadingInbox, setLoadingInbox] = useState(false);
 
   // Handle file add (append, not replace)
   const handleFiles = files => {
@@ -63,8 +59,6 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   }, []);
 
   const [popupFade, setPopupFade] = useState(false);
-  const [notificationVisible, setNotificationVisible] = useState(false);
-  const [notificationFade, setNotificationFade] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -132,17 +126,12 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     setLoading(false);
     if (res.ok) {
       const result = await res.json();
-      setForm({ nama: '', unit: boundUnit, tanggal: getTodayDate(), aset: '', deskripsi: '', foto: [] });
+      setForm({ nama: '', unit: lokasiUnitOptions[0], tanggal: tanggalOptions[0], aset: '', deskripsi: '', foto: [] });
       setLaporanId(result.laporan.id);
-      
-      // Show notification
-      setNotificationVisible(true);
-      setNotificationFade(false);
-      
-      // Trigger fade-out and close after 3 seconds
-      setTimeout(() => setNotificationFade(true), 2200);
-      setTimeout(() => setNotificationVisible(false), 3000);
-      
+      setShowPopup(true);
+      setPopupFade(false);
+      setTimeout(() => setPopupFade(true), 2200);
+      setTimeout(() => setShowPopup(false), 3000);
       fetchLaporan();
       if (onSuccess) onSuccess();
     } else {
@@ -171,68 +160,6 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   return (
     <>
       <Navbar />
-      
-      {/* Glass Notification for Success Submit */}
-      {notificationVisible && (
-        <div style={{
-          position: 'fixed',
-          top: 20,
-          left: '50%',
-          transform: `translateX(-50%) translateY(${notificationFade ? '-150px' : '0'})`,
-          zIndex: 10001,
-          transition: 'all 0.5s ease-out',
-          pointerEvents: 'none',
-        }}>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.25)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            borderRadius: '16px',
-            padding: '14px 28px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.4)',
-            color: '#1fa84b',
-            fontWeight: '600',
-            fontSize: '15px',
-            animation: notificationFade ? 'fadeOut 0.5s ease-in forwards' : 'slideInDown 0.5s ease-out forwards',
-          }}>
-            <style>{`
-              @keyframes slideInDown {
-                from {
-                  opacity: 0;
-                  transform: translateY(-20px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-              }
-              @keyframes fadeOut {
-                from {
-                  opacity: 1;
-                }
-                to {
-                  opacity: 0;
-                }
-              }
-            `}</style>
-            
-            {/* Success Checkmark Icon */}
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1fa84b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span style={{ fontWeight: '700', color: '#1fa84b' }}>Laporan Terkirim!</span>
-              <span style={{ fontSize: '13px', color: '#1fa84b', opacity: 0.9 }}>ID: <strong>{laporanId.substring(0, 8).toUpperCase()}</strong></span>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {showPopup && (
         <div className={"popup-overlay" + (popupFade ? " fade-out" : "") }>
           <div className={"popup-modal" + (popupFade ? " fade-out" : "") }>
@@ -261,8 +188,10 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         </div>
         <div className="form-group unit">
           <label htmlFor="unit">Lokasi Unit</label>
-          <select id="unit" name="unit" value={form.unit} disabled>
-            <option value={form.unit}>{form.unit}</option>
+          <select id="unit" name="unit" value={form.unit} onChange={handleChange} required>
+            {lokasiUnitOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
           </select>
           <span className="select-arrow" />
         </div>
@@ -371,82 +300,40 @@ const PelaporLaporanForm = ({ onSuccess }) => {
       </form>
       {/* Spacer untuk jarak ekstra dari footer */}
       <div style={{ width: '100%', height: '80px' }} />
-      {/* Floating menu button for pelapor only */}
+      {/* Floating action buttons for pelapor only */}
       {isPelapor && (
-        <div style={{ position: 'fixed', right: 32, bottom: 32, zIndex: 9999 }}>
-          <button
-            onClick={() => {
-              setIsAnimating(true);
-              setShowFloatingMenu(!showFloatingMenu);
-              setTimeout(() => setIsAnimating(false), 600);
-            }}
+        <>
+          <a
+            href={`https://wa.me/${WA_ADMIN}?text=${WA_MESSAGE}`}
+            className="floating-wa-btn"
             style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: '#e00000', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', color: '#fff', border: 'none', outline: 'none', cursor: 'pointer', transition: 'all 0.3s ease',
-              transform: isAnimating ? 'rotate(90deg) scale(1.1)' : 'rotate(0deg) scale(1)',
+              position: 'fixed',
+              right: 32,
+              bottom: 104, // 32 (inbox) + 56 (btn) + 16 (gap)
+              zIndex: 10000,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: '#25D366', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', color: '#fff', textDecoration: 'none', border: 'none', outline: 'none', cursor: 'pointer', transition: 'background 0.2s, box-shadow 0.2s',
             }}
-            title="Menu"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Chat Admin via WhatsApp"
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          </button>
-          
-          {showFloatingMenu && (
-            <div style={{
-              position: 'absolute', bottom: 72, right: 0, background: '#fff', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', overflow: 'hidden', minWidth: '200px', zIndex: 10000,
-              animation: 'slideUp 0.3s ease-out',
-              animationFillMode: 'forwards',
-            }}>
-              <style>{`
-                @keyframes slideUp {
-                  from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
-              `}</style>
-              <a
-                href="/pelapor/daftar-laporan"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', color: '#333', textDecoration: 'none', borderBottom: '1px solid #eee', transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#f5f5f5';
-                  e.target.style.transform = 'translateX(-4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.transform = 'translateX(0)';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e00000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
-                <span>Detail Laporan</span>
-              </a>
-              
-              <a
-                href={`https://wa.me/${WA_ADMIN}?text=${WA_MESSAGE}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', color: '#333', textDecoration: 'none', transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#f5f5f5';
-                  e.target.style.transform = 'translateX(-4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.transform = 'translateX(0)';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M23.472 19.615c-.355-.177-2.096-1.034-2.42-1.153-.324-.118-.56-.177-.797.178-.237.355-.914 1.153-1.12 1.39-.207.237-.412.266-.767.089-.355-.178-1.5-.553-2.86-1.763-1.057-.944-1.77-2.108-1.98-2.463-.207-.355-.022-.546.155-.723.159-.158.355-.412.532-.619.178-.207.237-.355.355-.59.118-.237.06-.443-.03-.62-.089-.178-.797-1.92-1.09-2.63-.287-.69-.58-.595-.797-.606-.207-.009-.443-.011-.68-.011-.237 0-.62.089-.944.443-.324.355-1.24 1.21-1.24 2.95 0 1.74 1.27 3.42 1.447 3.66.178.237 2.5 3.82 6.06 5.21.847.292 1.507.466 2.022.595.849.203 1.624.174 2.236.106.682-.075 2.096-.857 2.393-1.687.296-.83.296-1.54.207-1.687-.089-.148-.324-.237-.68-.414z" fill="#fff"/></svg>
-                <span>Hubungi Admin</span>
-              </a>
-            </div>
-          )}
-        </div>
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M23.472 19.615c-.355-.177-2.096-1.034-2.42-1.153-.324-.118-.56-.177-.797.178-.237.355-.914 1.153-1.12 1.39-.207.237-.412.266-.767.089-.355-.178-1.5-.553-2.86-1.763-1.057-.944-1.77-2.108-1.98-2.463-.207-.355-.022-.546.155-.723.159-.158.355-.412.532-.619.178-.207.237-.355.355-.59.118-.237.06-.443-.03-.62-.089-.178-.797-1.92-1.09-2.63-.287-.69-.58-.595-.797-.606-.207-.009-.443-.011-.68-.011-.237 0-.62.089-.944.443-.324.355-1.24 1.21-1.24 2.95 0 1.74 1.27 3.42 1.447 3.66.178.237 2.5 3.82 6.06 5.21.847.292 1.507.466 2.022.595.849.203 1.624.174 2.236.106.682-.075 2.096-.857 2.393-1.687.296-.83.296-1.54.207-1.687-.089-.148-.324-.237-.68-.414z" fill="#fff"/></svg>
+          </a>
+          <a
+            href="/pelapor/daftar-laporan"
+            className="floating-inbox-btn"
+            style={{
+              position: 'fixed',
+              right: 32,
+              bottom: 32,
+              zIndex: 9999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: '#e00000', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', color: '#fff', textDecoration: 'none', border: 'none', outline: 'none', cursor: 'pointer', transition: 'background 0.2s, box-shadow 0.2s',
+            }}
+            title="Inbox Laporan"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+          </a>
+        </>
       )}
     </>
   );

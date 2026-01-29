@@ -66,19 +66,6 @@ html, body, #root, .pelapor-daftar-page {
   padding: 8px 10px;
   border-bottom: 1px solid #f0f0f0;
 }
-
-.pelapor-table tbody tr {
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-}
-
-.pelapor-table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(255, 26, 26, 0.08) 0%, rgba(224, 0, 0, 0.04) 100%);
-  transform: translateX(4px);
-  box-shadow: -4px 0 12px rgba(224, 0, 0, 0.15);
-}
-
 .pelapor-table tbody tr:last-child td {
   border-bottom: none;
 }
