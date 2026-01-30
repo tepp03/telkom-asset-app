@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
+const { authenticateToken, requirePelapor } = require('../../middleware/auth');
 const apiLimiter = require('../../middleware/rateLimiter').apiLimiter;
 
 // Custom rate limiter untuk pelapor: 500 request per 15 menit
@@ -33,21 +34,10 @@ const { openDb } = require('../../db');
 
 // Mapping unit/lokasi ke kode singkat
 const unitCodeMap = {
-  'Lantai 1 - Front Office': 'FO',
-  'Lantai 1 - Customer Service': 'CS',
-  'Lantai 2 - Ruang Rapat': 'RR',
-  'Lantai 2 - Kantor Manager': 'KM',
-  'Lantai 3 - IT Support': 'IT',
-  'Lantai 3 - Gudang': 'GD',
-  'Lantai 4 - Pantry': 'PT',
-  'Lantai 4 - Ruang Meeting': 'RM',
-  'Basement - Parkir': 'BP',
-  'Lobby Utama': 'LB',
-  'Ruang Server': 'SV',
-  'Kantin': 'KT',
-  'Toilet Pria': 'TP',
-  'Toilet Wanita': 'TW',
-  'Area Luar Gedung': 'AG'
+  'BS (Business Service)': 'BS',
+  'LGS (Local Government Service)': 'LGS',
+  'PRQ (Performance, Risk & Quality)': 'PRQ',
+  'SSGS (Shared Service General Support)': 'SSGS'
 };
 
 // Fungsi untuk generate ID berdasarkan unit dengan nomor urut
@@ -73,12 +63,15 @@ async function generateReportId(unit) {
 }
 
 // POST /api/pelapor/laporan - tambah laporan ke DB (max 3 foto)
-router.post('/laporan', pelaporLimiter, upload.array('foto', 3), async (req, res) => {
-  const { nama, unit, tanggal, aset, deskripsi } = req.body;
+router.post('/laporan', authenticateToken, requirePelapor, pelaporLimiter, upload.array('foto', 3), async (req, res) => {
+  const { nama, tanggal, aset, deskripsi } = req.body;
+  // Ambil unit dari token JWT, bukan dari form
+  const unit = req.user.unit;
+  
   const files = req.files || [];
   const fotoUrls = files.map(f => '/uploads/' + f.filename);
   // Pastikan minimal 1 foto, maksimal 3
-  if (!nama || !unit || !tanggal || !aset || !deskripsi || fotoUrls.length === 0) {
+  if (!nama || !tanggal || !aset || !deskripsi || fotoUrls.length === 0) {
     return res.status(400).json({ error: 'Semua field wajib diisi dan minimal 1 foto' });
   }
   // Siapkan 3 kolom image_url, image_url2, image_url3
@@ -102,10 +95,11 @@ router.post('/laporan', pelaporLimiter, upload.array('foto', 3), async (req, res
   }
 });
 
-// GET /api/pelapor/laporan - list laporan dari DB
-router.get('/laporan', async (req, res) => {
+// GET /api/pelapor/laporan - list laporan dari DB (hanya laporan dari unit sendiri)
+router.get('/laporan', authenticateToken, requirePelapor, async (req, res) => {
+  const unit = req.user.unit; // Ambil unit dari token
   const db = openDb();
-  db.all('SELECT * FROM reports ORDER BY created_at ASC, id ASC', [], (err, rows) => {
+  db.all('SELECT * FROM reports WHERE unit = ? ORDER BY created_at ASC, id ASC', [unit], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Gagal mengambil data laporan' });
     // Map agar frontend tetap dapat field yang diharapkan
     const mapped = rows.map(r => ({

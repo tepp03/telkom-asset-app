@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const { getAdminByUsername, getTeknisiByUsername } = require('../../db');
+const { getAdminByUsername, getTeknisiByUsername, getPelaporByUsername } = require('../../db');
 const { authenticateToken } = require('../../middleware/auth');
 const { loginLimiter } = require('../../middleware/rateLimiter');
 
@@ -60,6 +60,23 @@ router.post('/login',
           { expiresIn: process.env.JWT_EXPIRY || '2h' }
         );
         return res.json({ token, user: { username, role: 'teknisi' } });
+      }
+
+      // Check pelapor
+      const pelapor = await getPelaporByUsername(username);
+      if (pelapor) {
+        const match = await bcrypt.compare(password, pelapor.password_hash);
+        if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+
+        // Set session
+        req.session.user = { username, role: 'pelapor', unit: pelapor.unit };
+
+        const token = jwt.sign(
+          { sub: username, role: 'pelapor', unit: pelapor.unit },
+          JWT_SECRET,
+          { expiresIn: process.env.JWT_EXPIRY || '2h' }
+        );
+        return res.json({ token, user: { username, role: 'pelapor', unit: pelapor.unit } });
       }
 
       return res.status(401).json({ error: 'Invalid credentials' });

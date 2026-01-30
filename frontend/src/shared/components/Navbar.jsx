@@ -30,7 +30,16 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
     // Deteksi role dari localStorage atau path
     const role = localStorage.getItem('role');
     if (role === 'pelapor') {
-      setRoleLabel('Pelapor');
+      // Ambil unit dari localStorage dan ambil singkatan/username
+      const unit = localStorage.getItem('unit');
+      const username = localStorage.getItem('userName');
+      // Jika unit ada, ambil singkatan (contoh: "BS (Business Service)" → "BS")
+      if (unit) {
+        const abbrev = unit.split(' ')[0]; // Ambil bagian pertama
+        setRoleLabel(abbrev);
+      } else {
+        setRoleLabel(username?.toUpperCase() || 'Pelapor');
+      }
       return;
     }
     const token = localStorage.getItem('token');

@@ -26,6 +26,8 @@ function Login({ setAuth, setRole }) {
         const role = localStorage.getItem('role');
         if (role === 'teknisi') {
           navigate('/teknisi/laporan-aset', { replace: true });
+        } else if (role === 'pelapor') {
+          navigate('/pelapor/inbox', { replace: true });
         } else {
           navigate('/laporan-aset', { replace: true });
         }
@@ -71,15 +73,7 @@ function Login({ setAuth, setRole }) {
                   setError('');
                   setLoading(true);
                   try {
-                    // Login pelapor (tanpa backend)
-                    if (username === 'pelapor' && password === 'pelapor123') {
-                      localStorage.setItem('role', 'pelapor');
-                      if (setAuth) setAuth(true);
-                      if (setRole) setRole('pelapor');
-                      navigate('/pelapor/inbox');
-                      return;
-                    }
-                    // Login admin/teknisi (via backend)
+                    // Login via backend (admin/teknisi/pelapor)
                     const res = await fetch('/api/login', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -90,15 +84,26 @@ function Login({ setAuth, setRole }) {
                       throw new Error(data?.error || 'Login gagal');
                     }
                     const role = data.user?.role;
-                    if (role !== 'admin' && role !== 'teknisi') {
+                    const unit = data.user?.unit; // untuk pelapor
+                    
+                    if (role !== 'admin' && role !== 'teknisi' && role !== 'pelapor') {
                       throw new Error('Role tidak valid. Hubungi admin.');
                     }
+                    
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userName', username);
                     localStorage.setItem('role', role);
+                    
+                    // Simpan unit untuk pelapor
+                    if (role === 'pelapor' && unit) {
+                      localStorage.setItem('unit', unit);
+                    }
+                    
                     if (setAuth) setAuth(true);
                     if (setRole) setRole(role);
+                    
                     if (role === 'teknisi') navigate('/teknisi/laporan-aset');
+                    else if (role === 'pelapor') navigate('/pelapor/inbox');
                     else navigate('/laporan-aset');
                   } catch (err) {
                     setError(err.message);

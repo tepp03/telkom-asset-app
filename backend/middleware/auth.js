@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { getAdminByUsername, getTeknisiByUsername } = require('../db');
+const { getAdminByUsername, getTeknisiByUsername, getPelaporByUsername } = require('../db');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -30,6 +30,8 @@ async function authenticateToken(req, res, next) {
       user = await getAdminByUsername(payload.sub);
     } else if (payload.role === 'teknisi') {
       user = await getTeknisiByUsername(payload.sub);
+    } else if (payload.role === 'pelapor') {
+      user = await getPelaporByUsername(payload.sub);
     }
     
     if (user && user.password_changed_at) {
@@ -44,7 +46,8 @@ async function authenticateToken(req, res, next) {
     
     req.user = {
       username: payload.sub,
-      role: payload.role
+      role: payload.role,
+      unit: payload.unit // untuk pelapor, simpan unit dari token
     };
     next();
   } catch (err) {
@@ -86,6 +89,16 @@ function requireTeknisi(req, res, next) {
 }
 
 /**
+ * Middleware untuk membatasi akses hanya untuk pelapor
+ */
+function requirePelapor(req, res, next) {
+  if (!req.user || req.user.role !== 'pelapor') {
+    return res.status(403).json({ error: 'Pelapor access required' });
+  }
+  next();
+}
+
+/**
  * Middleware untuk autentikasi session
  * Menggunakan informasi user yang disimpan di session
  */
@@ -102,5 +115,6 @@ module.exports = {
   authenticateSession,
   requireAdmin,
   requireAdminOrTeknisi,
-  requireTeknisi
+  requireTeknisi,
+  requirePelapor
 };

@@ -88,6 +88,13 @@ async function init() {
   password_changed_at INTEGER DEFAULT 0
 )`);
 
+  await run(db, `CREATE TABLE IF NOT EXISTS pelapor (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  unit TEXT NOT NULL,
+  password_changed_at INTEGER DEFAULT 0
+)`);
 
   const existing = await get(db, 'SELECT COUNT(1) as c FROM admins');
   if (!existing || existing.c === 0) {
@@ -101,6 +108,20 @@ async function init() {
     await run(db, 'INSERT INTO teknisi (username, password_hash) VALUES (?, ?)', ['teknisi', passwordHash]);
 }
 
+  // Insert 4 default pelapor accounts
+  const existingPelapor = await get(db, 'SELECT COUNT(1) as c FROM pelapor');
+  if (!existingPelapor || existingPelapor.c === 0) {
+    const pelapors = [
+      { username: 'bs', password: 'Pelapor@26!', unit: 'BS (Business Service)' },
+      { username: 'lgs', password: 'Pelapor@26!', unit: 'LGS (Local Government Service)' },
+      { username: 'prq', password: 'Pelapor@26!', unit: 'PRQ (Performance, Risk & Quality)' },
+      { username: 'ssgs', password: 'Pelapor@26!', unit: 'SSGS (Shared Service General Support)' }
+    ];
+    for (const p of pelapors) {
+      const passwordHash = bcrypt.hashSync(p.password, 12);
+      await run(db, 'INSERT INTO pelapor (username, password_hash, unit) VALUES (?, ?, ?)', [p.username, passwordHash, p.unit]);
+    }
+  }
 
   const countReports = await get(db, 'SELECT COUNT(1) as c FROM reports');
   if (!countReports || countReports.c === 0) {
@@ -217,5 +238,10 @@ module.exports = {
   deleteUser: (id) => {
     const db = openDb();
     return run(db, 'DELETE FROM users WHERE id = ?', [id]);
+  },
+  getPelaporByUsername: (username) => {
+    const db = openDb();
+    return get(db, 'SELECT * FROM pelapor WHERE username = ?', [username]);
   }
 };
+ 

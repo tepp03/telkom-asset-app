@@ -55,7 +55,12 @@ export default function PelaporDetailLaporan() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/pelapor/laporan`);
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/pelapor/laporan`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!res.ok) {
           setError('Gagal memuat detail laporan');
           return;
@@ -73,7 +78,12 @@ export default function PelaporDetailLaporan() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/pelapor/laporan');
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pelapor/laporan', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!res.ok) return;
         const data = await res.json();
         setAllReports(data);

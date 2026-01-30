@@ -21,14 +21,9 @@ function App() {
   useLayoutEffect(() => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
-    // Untuk pelapor, login tanpa token, hanya role 'pelapor'
-    if (role === 'pelapor') {
-      setIsAuthenticated(true);
-      setUserRole('pelapor');
-    } else {
-      setIsAuthenticated(!!token);
-      setUserRole(role || '');
-    }
+    // Semua role (admin, teknisi, pelapor) sekarang memerlukan token
+    setIsAuthenticated(!!token);
+    setUserRole(role || '');
     setLoading(false);
   }, []);
 
@@ -37,13 +32,8 @@ function App() {
     const syncAuth = () => {
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
-      if (role === 'pelapor') {
-        setIsAuthenticated(true);
-        setUserRole('pelapor');
-      } else {
-        setIsAuthenticated(!!token);
-        setUserRole(role || '');
-      }
+      setIsAuthenticated(!!token);
+      setUserRole(role || '');
     };
     window.addEventListener('storage', syncAuth);
     return () => window.removeEventListener('storage', syncAuth);

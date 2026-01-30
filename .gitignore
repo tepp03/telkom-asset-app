@@ -16,6 +16,7 @@ dist-ssr
 backend/data/uploads/
 backend/data/app.db
 backend/data/app.sqlite
+backend/data/sessions.sqlite
 
 # Environment variables
 .env

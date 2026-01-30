@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './PelaporLaporanForm.css';
+import './NotificationGlass.css';
+import './FabMenu.css';
 import Navbar from '../shared/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +15,10 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     'PRQ (Performance, Risk & Quality)',
     'SSGS (Shared Service General Support)'
   ];
+  
+  // Ambil unit dari localStorage (dari token saat login)
+  const userUnit = localStorage.getItem('unit') || lokasiUnitOptions[0];
+  
   // Tanggal hari ini otomatis (format YYYY-MM-DD untuk input type="date")
   const getTodayDate = () => {
     const today = new Date();
@@ -24,7 +30,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
 
   const [form, setForm] = useState({
     nama: '',
-    unit: lokasiUnitOptions[0],
+    unit: userUnit, // Set dari localStorage
     tanggal: getTodayDate(),
     aset: '',
     deskripsi: '',
@@ -32,6 +38,14 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   });
 
   const [fotoPreview, setFotoPreview] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [laporanId, setLaporanId] = useState('');
+  const [laporan, setLaporan] = useState([]);
+  const [loadingInbox, setLoadingInbox] = useState(false);
+
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
   // Handle file add (append, not replace)
   const handleFiles = files => {
@@ -115,18 +129,23 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     Object.entries(form).forEach(([k, v]) => {
       if (k === 'foto' && Array.isArray(v)) {
         v.forEach(file => data.append('foto', file));
-      } else {
+      } else if (k !== 'unit') { // Jangan kirim unit, backend ambil dari token
         data.append(k, v);
       }
     });
+    
+    const token = localStorage.getItem('token');
     const res = await fetch('/api/pelapor/laporan', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
       body: data
     });
     setLoading(false);
     if (res.ok) {
       const result = await res.json();
-      setForm({ nama: '', unit: lokasiUnitOptions[0], tanggal: tanggalOptions[0], aset: '', deskripsi: '', foto: [] });
+      setForm({ nama: '', unit: userUnit, tanggal: getTodayDate(), aset: '', deskripsi: '', foto: [] });
       setLaporanId(result.laporan.id);
       setShowPopup(true);
       setPopupFade(false);
@@ -141,7 +160,12 @@ const PelaporLaporanForm = ({ onSuccess }) => {
 
   const fetchLaporan = async () => {
     setLoadingInbox(true);
-    const res = await fetch('/api/pelapor/laporan');
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/pelapor/laporan', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (res.ok) {
       setLaporan(await res.json());
     }
@@ -161,20 +185,38 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     <>
       <Navbar />
       {showPopup && (
-        <div className={"popup-overlay" + (popupFade ? " fade-out" : "") }>
-          <div className={"popup-modal" + (popupFade ? " fade-out" : "") }>
-            <div className="popup-content-row">
-              <span className="popup-icon" style={{background: '#1fa84b'}}>
-                {/* Simple checkmark icon only */}
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="16" fill="#1fa84b"/>
-                  <path d="M10 17.5L14 21L22 13" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <div className="notification-glass-overlay">
+          <div className={"notification-glass-container" + (popupFade ? " fade-out" : "")}>
+            <div className="notification-glass-content">
+              {/* Animated check circle */}
+              <div className="notification-check-circle">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="50" cy="50" r="45" stroke="url(#grad)" strokeWidth="2" opacity="0.3"/>
+                  <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#1fa84b"/>
+                      <stop offset="100%" stopColor="#0d9f3e"/>
+                    </linearGradient>
+                  </defs>
+                  <circle className="check-circle-progress" cx="50" cy="50" r="45" stroke="url(#grad)" strokeWidth="3" fill="none"/>
+                  <polyline className="check-mark" points="30,50 45,65 70,40" stroke="#1fa84b" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </span>
-              <div className="popup-texts">
-                <h3>Laporan Terkirim!</h3>
-                <p>ID: <strong>{laporanId.substring(0, 8)}</strong></p>
               </div>
+
+              {/* Text content */}
+              <div className="notification-text-content">
+                <h2 className="notification-title">Laporan Terkirim! ✨</h2>
+                <p className="notification-subtitle">Laporan pengaduan Anda telah berhasil dikirimkan ke sistem</p>
+                <div className="notification-id-badge">
+                  ID Laporan: <span className="id-value">{laporanId}</span>
+                </div>
+              </div>
+
+              {/* Floating particles */}
+              <div className="particle particle-1"></div>
+              <div className="particle particle-2"></div>
+              <div className="particle particle-3"></div>
+              <div className="particle particle-4"></div>
             </div>
           </div>
         </div>
@@ -188,12 +230,13 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         </div>
         <div className="form-group unit">
           <label htmlFor="unit">Lokasi Unit</label>
-          <select id="unit" name="unit" value={form.unit} onChange={handleChange} required>
+          <select id="unit" name="unit" value={form.unit} onChange={handleChange} disabled style={{cursor: 'not-allowed', opacity: 0.7}} required>
             {lokasiUnitOptions.map(opt => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
           </select>
           <span className="select-arrow" />
+          <small style={{display: 'block', marginTop: 4, color: '#666', fontSize: '0.85em'}}>Unit sesuai dengan akun Anda</small>
         </div>
         <div className="form-group tanggal">
           <label htmlFor="tanggal">Tanggal Kejadian</label>
@@ -300,40 +343,61 @@ const PelaporLaporanForm = ({ onSuccess }) => {
       </form>
       {/* Spacer untuk jarak ekstra dari footer */}
       <div style={{ width: '100%', height: '80px' }} />
-      {/* Floating action buttons for pelapor only */}
+      
+      {/* FAB Menu untuk pelapor only */}
       {isPelapor && (
-        <>
-          <a
-            href={`https://wa.me/${WA_ADMIN}?text=${WA_MESSAGE}`}
-            className="floating-wa-btn"
-            style={{
-              position: 'fixed',
-              right: 32,
-              bottom: 104, // 32 (inbox) + 56 (btn) + 16 (gap)
-              zIndex: 10000,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: '#25D366', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', color: '#fff', textDecoration: 'none', border: 'none', outline: 'none', cursor: 'pointer', transition: 'background 0.2s, box-shadow 0.2s',
-            }}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Chat Admin via WhatsApp"
+        <div className="fab-menu-container">
+          {/* Backdrop untuk close menu - HARUS SEBELUM MENU ITEMS */}
+          {showFabMenu && (
+            <div 
+              className="fab-menu-backdrop" 
+              onClick={() => setShowFabMenu(false)}
+            ></div>
+          )}
+          
+          {/* Menu items - muncul ketika showFabMenu true */}
+          <div className={`fab-menu-items ${showFabMenu ? 'show' : ''}`}>
+            {/* WhatsApp */}
+            <a
+              href={`https://wa.me/${WA_ADMIN}?text=${WA_MESSAGE}`}
+              className="fab-menu-item fab-menu-whatsapp"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Chat Admin via WhatsApp"
+              onClick={() => setShowFabMenu(false)}
+            >
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="currentColor">
+                <circle cx="16" cy="16" r="16" fill="#25D366"/>
+                <path d="M23.472 19.615c-.355-.177-2.096-1.034-2.42-1.153-.324-.118-.56-.177-.797.178-.237.355-.914 1.153-1.12 1.39-.207.237-.412.266-.767.089-.355-.178-1.5-.553-2.86-1.763-1.057-.944-1.77-2.108-1.98-2.463-.207-.355-.022-.546.155-.723.159-.158.355-.412.532-.619.178-.207.237-.355.355-.59.118-.237.06-.443-.03-.62-.089-.178-.797-1.92-1.09-2.63-.287-.69-.58-.595-.797-.606-.207-.009-.443-.011-.68-.011-.237 0-.62.089-.944.443-.324.355-1.24 1.21-1.24 2.95 0 1.74 1.27 3.42 1.447 3.66.178.237 2.5 3.82 6.06 5.21.847.292 1.507.466 2.022.595.849.203 1.624.174 2.236.106.682-.075 2.096-.857 2.393-1.687.296-.83.296-1.54.207-1.687-.089-.148-.324-.237-.68-.414z" fill="#fff"/>
+              </svg>
+            </a>
+            
+            {/* Email */}
+            <a
+              href="/pelapor/daftar-laporan"
+              className="fab-menu-item fab-menu-email"
+              title="Lihat Detail Laporan"
+              onClick={() => setShowFabMenu(false)}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M2 6l10 7 10-7"/>
+              </svg>
+            </a>
+          </div>
+
+          {/* Main FAB button */}
+          <button
+            className={`fab-menu-main ${showFabMenu ? 'active' : ''}`}
+            onClick={() => setShowFabMenu(!showFabMenu)}
+            title="Hubungi Admin"
+            type="button"
           >
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M23.472 19.615c-.355-.177-2.096-1.034-2.42-1.153-.324-.118-.56-.177-.797.178-.237.355-.914 1.153-1.12 1.39-.207.237-.412.266-.767.089-.355-.178-1.5-.553-2.86-1.763-1.057-.944-1.77-2.108-1.98-2.463-.207-.355-.022-.546.155-.723.159-.158.355-.412.532-.619.178-.207.237-.355.355-.59.118-.237.06-.443-.03-.62-.089-.178-.797-1.92-1.09-2.63-.287-.69-.58-.595-.797-.606-.207-.009-.443-.011-.68-.011-.237 0-.62.089-.944.443-.324.355-1.24 1.21-1.24 2.95 0 1.74 1.27 3.42 1.447 3.66.178.237 2.5 3.82 6.06 5.21.847.292 1.507.466 2.022.595.849.203 1.624.174 2.236.106.682-.075 2.096-.857 2.393-1.687.296-.83.296-1.54.207-1.687-.089-.148-.324-.237-.68-.414z" fill="#fff"/></svg>
-          </a>
-          <a
-            href="/pelapor/daftar-laporan"
-            className="floating-inbox-btn"
-            style={{
-              position: 'fixed',
-              right: 32,
-              bottom: 32,
-              zIndex: 9999,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: '#e00000', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', color: '#fff', textDecoration: 'none', border: 'none', outline: 'none', cursor: 'pointer', transition: 'background 0.2s, box-shadow 0.2s',
-            }}
-            title="Inbox Laporan"
-          >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
-          </a>
-        </>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
+              <path d="M3 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7M3 7c0-1.1.9-2 2-2h2l2-3h6l2 3h2c1.1 0 2 .9 2 2" fill="white" stroke="white"/>
+            </svg>
+          </button>
+        </div>
       )}
     </>
   );
