@@ -113,6 +113,9 @@ html.pelapor-bg, body.pelapor-bg {
   font-weight: 600;
   box-shadow: none;
   box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
   
 .pelapor-laporan-form input::placeholder,

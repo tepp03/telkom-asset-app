@@ -5,8 +5,9 @@
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 60px;
   z-index: 9999;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -31,9 +32,9 @@
 .notification-glass-container {
   position: relative;
   width: 90%;
-  max-width: 500px;
-  padding: 40px 30px;
-  border-radius: 24px;
+  max-width: 380px;
+  padding: 20px 20px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 
@@ -82,9 +83,9 @@
 /* Animated check circle */
 .notification-check-circle {
   position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 25px;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 15px;
   animation: checkCircleEntry 0.6s ease-out;
 }
 
@@ -149,10 +150,10 @@
 }
 
 .notification-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   background: linear-gradient(135deg, #1fa84b, #0d9f3e);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -160,20 +161,20 @@
 }
 
 .notification-subtitle {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
-  margin: 0 0 20px;
-  line-height: 1.5;
+  margin: 0 0 12px;
+  line-height: 1.4;
 }
 
 /* ID Badge with glassmorphism */
 .notification-id-badge {
   display: inline-block;
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
   background: rgba(31, 168, 75, 0.1);
   border: 1px solid rgba(31, 168, 75, 0.3);
-  font-size: 13px;
+  font-size: 11px;
   color: #333;
   font-weight: 600;
   backdrop-filter: blur(8px);

@@ -112,10 +112,10 @@ async function init() {
   const existingPelapor = await get(db, 'SELECT COUNT(1) as c FROM pelapor');
   if (!existingPelapor || existingPelapor.c === 0) {
     const pelapors = [
-      { username: 'bs', password: 'Pelapor@26!', unit: 'BS (Business Service)' },
-      { username: 'lgs', password: 'Pelapor@26!', unit: 'LGS (Local Government Service)' },
-      { username: 'prq', password: 'Pelapor@26!', unit: 'PRQ (Performance, Risk & Quality)' },
-      { username: 'ssgs', password: 'Pelapor@26!', unit: 'SSGS (Shared Service General Support)' }
+      { username: 'pelapor_bs', password: 'PelaporBS2026!', unit: 'BS (Business Service)' },
+      { username: 'pelapor_lgs', password: 'PelaporLGS2026!', unit: 'LGS (Local Government Service)' },
+      { username: 'pelapor_prq', password: 'PelaporPRQ2026!', unit: 'PRQ (Performance, Risk & Quality)' },
+      { username: 'pelapor_ssgs', password: 'PelaporSSGS2026!', unit: 'SSGS (Shared Service General Support)' }
     ];
     for (const p of pelapors) {
       const passwordHash = bcrypt.hashSync(p.password, 12);
@@ -244,4 +244,3 @@ module.exports = {
     return get(db, 'SELECT * FROM pelapor WHERE username = ?', [username]);
   }
 };
- 

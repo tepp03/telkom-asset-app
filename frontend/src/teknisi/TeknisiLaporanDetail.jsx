@@ -138,10 +138,8 @@ export default function TeknisiLaporanDetail() {
     const selectedFiles = Array.from(e.target.files);
     if (!selectedFiles || selectedFiles.length === 0) return;
     setError('');
-    // Gabungkan file lama (files) dan baru, urutkan agar yang lama tetap di depan
-    let newFiles = Array.from(files).concat(selectedFiles);
-    // Hanya ambil maksimal 3 file pertama (yang paling lama)
-    newFiles = newFiles.slice(0, 3);
+    // Gunakan file yang baru dipilih (replace), maksimal 3 file
+    const newFiles = selectedFiles.slice(0, 3);
     setFiles(newFiles);
     try {
       const token = localStorage.getItem('token');
@@ -171,6 +169,7 @@ export default function TeknisiLaporanDetail() {
       const data = await res.json();
       const [u1, u2, u3] = data.urls || [];
       setReport({ ...report, image_url: u1 || report?.image_url, image_url2: u2 || report?.image_url2, image_url3: u3 || report?.image_url3 });
+      setFiles([]);
       // Reset input file
       e.target.value = '';
     } catch (_) {

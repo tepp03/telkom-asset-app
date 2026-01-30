@@ -229,14 +229,12 @@ const PelaporLaporanForm = ({ onSuccess }) => {
           <input id="nama" name="nama" placeholder="Masukkan nama lengkap Anda" value={form.nama} onChange={handleChange} required />
         </div>
         <div className="form-group unit">
-          <label htmlFor="unit">Lokasi Unit</label>
-          <select id="unit" name="unit" value={form.unit} onChange={handleChange} disabled style={{cursor: 'not-allowed', opacity: 0.7}} required>
+          <label htmlFor="unit">Nama Unit</label>
+          <select id="unit" name="unit" value={form.unit} onChange={handleChange} disabled style={{cursor: 'not-allowed', opacity: 1}} required>
             {lokasiUnitOptions.map(opt => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
           </select>
-          <span className="select-arrow" />
-          <small style={{display: 'block', marginTop: 4, color: '#666', fontSize: '0.85em'}}>Unit sesuai dengan akun Anda</small>
         </div>
         <div className="form-group tanggal">
           <label htmlFor="tanggal">Tanggal Kejadian</label>
