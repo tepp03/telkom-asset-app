@@ -40,6 +40,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   const [fotoPreview, setFotoPreview] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [laporanId, setLaporanId] = useState('');
   const [laporan, setLaporan] = useState([]);
@@ -53,6 +54,14 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     let newFiles = form.foto.concat(arr).slice(0, 3);
     setFotoPreview(newFiles.map(f => URL.createObjectURL(f)));
     setForm(f => ({ ...f, foto: newFiles }));
+    if (newFiles.length > 0) {
+      setFieldErrors(prev => {
+        if (!prev.foto) return prev;
+        const next = { ...prev };
+        delete next.foto;
+        return next;
+      });
+    }
   };
 
   // Remove file by index
@@ -70,6 +79,11 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   useEffect(() => {
     document.body.classList.add('pelapor-bg');
     return () => document.body.classList.remove('pelapor-bg');
+  }, []);
+
+  useEffect(() => {
+    document.title = 'Buat Laporan | Pelapor';
+    return () => { document.title = 'Aplikasi Pengaduan Aset'; };
   }, []);
 
   const [popupFade, setPopupFade] = useState(false);
@@ -118,11 +132,54 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         ...f,
         [name]: value
       }));
+      setFieldErrors(prev => {
+        if (!prev[name]) return prev;
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
     }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    const namaTrim = form.nama.trim();
+    const asetTrim = form.aset.trim();
+    const deskripsiTrim = form.deskripsi.trim();
+
+    if (!namaTrim) {
+      errors.nama = 'Nama pelapor wajib diisi.';
+    }
+
+    if (!form.tanggal) {
+      errors.tanggal = 'Tanggal kejadian wajib diisi.';
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(form.tanggal)) {
+      errors.tanggal = 'Format tanggal harus YYYY-MM-DD.';
+    }
+
+    if (!asetTrim) {
+      errors.aset = 'Nama aset wajib diisi.';
+    }
+
+    if (!deskripsiTrim) {
+      errors.deskripsi = 'Deskripsi wajib diisi.';
+    }
+
+    if (!form.foto || form.foto.length === 0) {
+      errors.foto = 'Minimal 1 foto harus diunggah.';
+    }
+
+    return errors;
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('');
+      return;
+    }
     setLoading(true);
     setError('');
     const data = new FormData();
@@ -146,6 +203,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     if (res.ok) {
       const result = await res.json();
       setForm({ nama: '', unit: userUnit, tanggal: getTodayDate(), aset: '', deskripsi: '', foto: [] });
+      setFieldErrors({});
       setLaporanId(result.laporan.id);
       setShowPopup(true);
       setPopupFade(false);
@@ -188,35 +246,17 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         <div className="notification-glass-overlay">
           <div className={"notification-glass-container" + (popupFade ? " fade-out" : "")}>
             <div className="notification-glass-content">
-              {/* Animated check circle */}
-              <div className="notification-check-circle">
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="50" cy="50" r="45" stroke="url(#grad)" strokeWidth="2" opacity="0.3"/>
-                  <defs>
-                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#1fa84b"/>
-                      <stop offset="100%" stopColor="#0d9f3e"/>
-                    </linearGradient>
-                  </defs>
-                  <circle className="check-circle-progress" cx="50" cy="50" r="45" stroke="url(#grad)" strokeWidth="3" fill="none"/>
-                  <polyline className="check-mark" points="30,50 45,65 70,40" stroke="#1fa84b" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+              {/* Minimal icon */}
+              <div className="notification-icon" aria-hidden="true">✓</div>
 
               {/* Text content */}
               <div className="notification-text-content">
-                <h2 className="notification-title">Laporan Terkirim! ✨</h2>
-                <p className="notification-subtitle">Laporan pengaduan Anda telah berhasil dikirimkan ke sistem</p>
+                <h2 className="notification-title">Laporan terkirim</h2>
+                <p className="notification-subtitle">Terimakasih telah melapor!!</p>
                 <div className="notification-id-badge">
                   ID Laporan: <span className="id-value">{laporanId}</span>
                 </div>
               </div>
-
-              {/* Floating particles */}
-              <div className="particle particle-1"></div>
-              <div className="particle particle-2"></div>
-              <div className="particle particle-3"></div>
-              <div className="particle particle-4"></div>
             </div>
           </div>
         </div>
@@ -226,11 +266,12 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         {error && <div className="error">{error}</div>}
         <div className="form-group nama">
           <label htmlFor="nama">Nama Pelapor</label>
-          <input id="nama" name="nama" placeholder="Masukkan nama lengkap Anda" value={form.nama} onChange={handleChange} required />
+          <input id="nama" name="nama" placeholder="Masukkan nama lengkap Anda" value={form.nama} onChange={handleChange} />
+          {fieldErrors.nama && <div className="field-note">{fieldErrors.nama}</div>}
         </div>
         <div className="form-group unit">
           <label htmlFor="unit">Nama Unit</label>
-          <select id="unit" name="unit" value={form.unit} onChange={handleChange} disabled style={{cursor: 'not-allowed', opacity: 1}} required>
+          <select id="unit" name="unit" value={form.unit} onChange={handleChange} disabled style={{cursor: 'not-allowed', opacity: 1}}>
             {lokasiUnitOptions.map(opt => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
@@ -288,10 +329,12 @@ const PelaporLaporanForm = ({ onSuccess }) => {
               </div>
             )}
           </div>
+          {fieldErrors.tanggal && <div className="field-note">{fieldErrors.tanggal}</div>}
         </div>
         <div className="form-group aset">
           <label htmlFor="aset">Nama Aset</label>
-          <input id="aset" name="aset" placeholder="Contoh: Laptop, Printer, AC" value={form.aset} onChange={handleChange} required />
+          <input id="aset" name="aset" placeholder="Contoh: Laptop, Printer, AC" value={form.aset} onChange={handleChange} />
+          {fieldErrors.aset && <div className="field-note">{fieldErrors.aset}</div>}
         </div>
         <div className="form-group deskripsi">
           <label htmlFor="deskripsi">Deskripsi</label>
@@ -300,8 +343,8 @@ const PelaporLaporanForm = ({ onSuccess }) => {
             name="deskripsi"
             value={form.deskripsi}
             onChange={handleChange}
-            required
           />
+          {fieldErrors.deskripsi && <div className="field-note">{fieldErrors.deskripsi}</div>}
         </div>
         <div className="form-group foto">
           <label htmlFor="foto" style={{ display: 'flex', alignItems: 'center' }}>
@@ -328,6 +371,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e00000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="4"/><path d="M5.5 7h13l-1.38-2.76A2 2 0 0 0 15.03 3H8.97a2 2 0 0 0-1.79 1.24L5.5 7z"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>
             {form.foto.length < 3 ? 'Tambah Foto' : 'Maksimal 3 Foto'}
           </label>
+          {fieldErrors.foto && <div className="field-note">{fieldErrors.foto}</div>}
           {/* Foto preview dihilangkan sesuai permintaan */}
         </div>
         <button

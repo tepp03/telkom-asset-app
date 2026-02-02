@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const { init } = require('./db');
+const seed = require('./scripts/seed');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const authRouter = require('./routes/shared/auth');
 const reportsRouter = require('./routes/shared/reports');
@@ -90,8 +91,9 @@ app.use('/api', authRouter);        // /login, /me
 app.use('/api', reportsRouter);     // /reports (shared)
 app.use('/api/pelapor', pelaporRouter); // /pelapor/laporan
 
-// Serve uploaded images
-app.use('/uploads', express.static(path.join(__dirname, 'data', 'uploads')));
+// Removed: uploads folder no longer needed (using Cloudinary)
+// app.use('/uploads', express.static(path.join(__dirname, 'data', 'uploads')));
+
 app.use('/api/admin', adminRouter);   // /admin/users, /admin/dashboard
 app.use('/api/teknisi', teknisiRouter); // /teknisi/reports
 
@@ -103,9 +105,13 @@ app.use((err, req, res, next) => {
 });
 
 init().then(() => {
+    // Auto-seed database dengan dummy accounts
+    return seed();
+  }).then(() => {
   app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);
   });
 }).catch(err => {
+    console.error('Startup error:', err);
   process.exit(1);
 });

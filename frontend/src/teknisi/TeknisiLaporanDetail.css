@@ -180,6 +180,37 @@
 
 .image-slide {
   min-width: 100%;
+  position: relative;
+}
+
+.btn-delete-image {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  padding: 0;
+}
+
+.btn-delete-image:hover {
+  transform: scale(1.15);
+  color: #ff1a1a;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+}
+
+.btn-delete-image:active {
+  transform: scale(0.95);
 }
 
 .slider-arrow {
@@ -447,6 +478,11 @@
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid #e9ecef;
+}
+
+.btn-next.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .action-buttons {

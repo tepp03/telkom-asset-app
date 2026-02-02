@@ -421,6 +421,11 @@
   border-top: 1px solid #e9ecef;
 }
 
+.btn-next.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .action-buttons {
   display: flex;
   gap: 12px;

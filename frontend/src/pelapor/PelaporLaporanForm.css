@@ -224,6 +224,15 @@ html.pelapor-bg, body.pelapor-bg {
   letter-spacing: 0.2px;
 }
 
+.pelapor-laporan-form .field-note {
+  color: #ffeaea;
+  padding: 2px 2px;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.35;
+}
+
 .pelapor-laporan-form .success-message {
   color: #d4ffd4;
   background: rgba(0, 128, 0, 0.25);

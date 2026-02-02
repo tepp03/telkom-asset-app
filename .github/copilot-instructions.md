@@ -42,10 +42,6 @@ npm run lint            # ESLint check
 2. Use token header: `Authorization: Bearer {token}`
 3. Key endpoints: `/api/reports`, `/api/reports/{id}/status` (PUT)
 
-### Default Dev Credentials
-- **Admin**: username `admin` / password `admin123`
-- **Teknisi**: username `teknisi` / password `TelkomTeknisi2026!` (change in production)
-
 ## Code Patterns & Conventions
 
 ### Backend

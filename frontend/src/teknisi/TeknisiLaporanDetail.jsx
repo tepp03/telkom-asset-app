@@ -27,6 +27,50 @@ const getNextStatusClass = (status) => {
   return 'status-to-do';
 };
 
+const normalizeAssetName = (value) => {
+  const cleaned = (value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleaned) return '';
+  return cleaned.split(' ').sort().join(' ');
+};
+
+const levenshteinDistance = (a, b) => {
+  const s = a || '';
+  const t = b || '';
+  const m = s.length;
+  const n = t.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1));
+  for (let i = 0; i <= m; i += 1) dp[i][0] = i;
+  for (let j = 0; j <= n; j += 1) dp[0][j] = j;
+  for (let i = 1; i <= m; i += 1) {
+    for (let j = 1; j <= n; j += 1) {
+      const cost = s[i - 1] === t[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[m][n];
+};
+
+const isSimilarAssetName = (a, b) => {
+  const na = normalizeAssetName(a);
+  const nb = normalizeAssetName(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  const dist = levenshteinDistance(na, nb);
+  const maxLen = Math.max(na.length, nb.length);
+  const similarity = maxLen === 0 ? 0 : (maxLen - dist) / maxLen;
+  return dist <= 2 || similarity >= 0.8;
+};
+
 export default function TeknisiLaporanDetail() {
     // Blokir tombol back browser agar tidak bisa kembali ke halaman sebelumnya
     useEffect(() => {
@@ -43,7 +87,6 @@ export default function TeknisiLaporanDetail() {
   const navigate = useNavigate();
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
-  const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [allReports, setAllReports] = useState([]);
@@ -112,70 +155,128 @@ export default function TeknisiLaporanDetail() {
 
   useEffect(() => {
     if (report && allReports.length > 0) {
-      const similar = allReports.filter(r => r.unit === report.unit && r.id !== report.id);
+      const similar = allReports.filter(
+        r => isSimilarAssetName(r.nama_barang, report.nama_barang) && r.id !== report.id
+      );
       setSimilarReports(similar);
     }
   }, [report, allReports]);
 
-  const baseImages = [report?.image_url, report?.image_url2, report?.image_url3].filter(Boolean);
-  const imageSources = (() => {
-    if (baseImages.length === 0) {
-      return [
-        'https://placehold.co/300x300?text=Foto+1',
-        'https://placehold.co/300x300?text=Foto+2',
-        'https://placehold.co/300x300?text=Foto+3'
-      ];
-    }
-    const filled = [...baseImages];
-    while (filled.length < 3) {
-      const dummy = ['https://placehold.co/300x300?text=Foto+1','https://placehold.co/300x300?text=Foto+2','https://placehold.co/300x300?text=Foto+3'];
-      filled.push(dummy[filled.length % dummy.length]);
-    }
-    return filled.slice(0,3);
-  })();
+  const slotImages = [report?.image_url, report?.image_url2, report?.image_url3];
+  const imageSources = slotImages
+    .map((src, idx) => (src ? { src, slot: idx + 1 } : null))
+    .filter(Boolean);
 
-  const handleFileChange = async (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    if (!selectedFiles || selectedFiles.length === 0) return;
+  useEffect(() => {
+    if (activeImageIndex >= imageSources.length) {
+      setActiveImageIndex(0);
+    }
+  }, [imageSources.length, activeImageIndex]);
+
+  const handleReplaceImageChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files || files.length === 0) return;
+    const file = files[0];
     setError('');
-    // Gunakan file yang baru dipilih (replace), maksimal 3 file
-    const newFiles = selectedFiles.slice(0, 3);
-    setFiles(newFiles);
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         navigate('/login');
         return;
       }
-      const form = new FormData();
-      newFiles.forEach(f => form.append('images', f));
       setUploading(true);
-      const res = await fetch(`/api/teknisi/reports/${id}/images`, {
+      const form = new FormData();
+      form.append('image', file);
+
+      const currentSlot = imageSources[activeImageIndex]?.slot;
+      const emptySlotIndex = slotImages.findIndex((s) => !s);
+      const hasEmptySlot = emptySlotIndex >= 0;
+      const slotToReplace = hasEmptySlot ? emptySlotIndex + 1 : (currentSlot || 1);
+
+      const res = await fetch(`/api/teknisi/reports/${id}/images/${slotToReplace}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: form
       });
+      
       setUploading(false);
+      
       if (res.status === 401) {
         localStorage.clear();
         navigate('/login');
         return;
       }
+      
       if (!res.ok) {
         const t = await res.text();
         setError(`Gagal mengunggah gambar (${res.status}). ${t}`);
+        e.target.value = '';
         return;
       }
+      
       const data = await res.json();
-      const [u1, u2, u3] = data.urls || [];
-      setReport({ ...report, image_url: u1 || report?.image_url, image_url2: u2 || report?.image_url2, image_url3: u3 || report?.image_url3 });
-      setFiles([]);
-      // Reset input file
+      const [u1, u2, u3] = data.urls;
+
+      setReport(prev => ({
+        ...prev,
+        image_url: u1 || null,
+        image_url2: u2 || null,
+        image_url3: u3 || null
+      }));
+      
       e.target.value = '';
-    } catch (_) {
+    } catch (err) {
       setUploading(false);
-      setError('Terjadi kesalahan saat upload');
+      setError(`Terjadi kesalahan saat upload: ${err.message}`);
     }
+  };
+
+  const handleDeleteImage = async (slot) => {
+    setModal({
+      isOpen: true,
+      title: 'Hapus Gambar',
+      message: `Yakin ingin menghapus gambar slot ${slot}?`,
+      action: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            navigate('/login');
+            return;
+          }
+
+          const res = await fetch(`http://localhost:4001/api/teknisi/reports/${id}/images/${slot}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (res.status === 401) {
+            localStorage.clear();
+            navigate('/login');
+            return;
+          }
+
+          if (!res.ok) {
+            const t = await res.text();
+            setError(`Gagal menghapus gambar: ${t}`);
+            return;
+          }
+
+          const data = await res.json();
+          const [u1, u2, u3] = data.urls;
+
+          setReport(prev => ({
+            ...prev,
+            image_url: u1 || null,
+            image_url2: u2 || null,
+            image_url3: u3 || null
+          }));
+
+          setModal({ isOpen: false });
+        } catch (err) {
+          setError(`Terjadi kesalahan: ${err.message}`);
+        }
+      }
+    });
   };
 
   const handleStatusCycle = () => {
@@ -223,25 +324,25 @@ export default function TeknisiLaporanDetail() {
   };
 
   const handlePrevImage = () => {
-    if (activeImageIndex > 0) {
-      setActiveImageIndex(activeImageIndex - 1);
-    }
+    if (imageSources.length === 0) return;
+    setActiveImageIndex(prev => (prev === 0 ? imageSources.length - 1 : prev - 1));
   };
   
   const handleNextImage = () => {
-    if (activeImageIndex < imageSources.length - 1) {
-      setActiveImageIndex(activeImageIndex + 1);
-    }
+    if (imageSources.length === 0) return;
+    setActiveImageIndex(prev => (prev === imageSources.length - 1 ? 0 : prev + 1));
   };
 
   return (
     <div className="detail-page">
       <Navbar />
+      {error && (
+        <div style={{ textAlign: 'center', color: '#b00000', padding: '16px' }}>{error}</div>
+      )}
       <div className="detail-main">
         <h1 className="detail-title">Detail Laporan</h1>
-        {error && <div style={{color:'#b00000', padding:'8px', textAlign:'center'}}>{error}</div>}
         {!report ? (
-          <div style={{textAlign:'center', padding:'20px'}}>Memuat…</div>
+          <div style={{ textAlign: 'center', padding: '20px' }}>Memuat…</div>
         ) : (
           <div className="detail-wrapper">
             <div className="detail-container">
@@ -280,59 +381,80 @@ export default function TeknisiLaporanDetail() {
                   </div>
 
                   <div className="detail-image">
-                    <div className="image-slider">
-                      <div
-                        className="image-track"
-                        style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
-                      >
-                        {imageSources.map((src, idx) => (
-                          <div className="image-slide" key={idx} onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}>
-                            <div className="image-wrapper">
-                              <img src={src} alt={`Lampiran ${idx + 1}`} />
-                              <div className="image-overlay">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="#fff">
-                                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                                </svg>
-                                <span>Klik untuk memperbesar</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                    {imageSources.length === 0 ? (
+                      <div style={{ color: '#777', padding: '24px', textAlign: 'center', width: '100%' }}>
+                        Tidak ada foto
                       </div>
-                      {imageSources.length > 1 && (
-                        <>
-                          <button className="slider-arrow prev" type="button" onClick={handlePrevImage} aria-label="Foto sebelumnya">‹</button>
-                          <button className="slider-arrow next" type="button" onClick={handleNextImage} aria-label="Foto berikutnya">›</button>
-                          <div className="slider-dots">
-                            {imageSources.map((_, idx) => (
-                              <button
-                                key={idx}
-                                className={`slider-dot ${activeImageIndex === idx ? 'active' : ''}`}
+                    ) : (
+                      <div className="image-slider">
+                        <div
+                          className="image-track"
+                          style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
+                        >
+                          {imageSources.map((img, idx) => (
+                            <div className="image-slide" key={img.slot} onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}>
+                              <div className="image-wrapper">
+                                <img src={img.src} alt={`Lampiran ${idx + 1}`} />
+                                <div className="image-overlay">
+                                  <svg width="48" height="48" viewBox="0 0 24 24" fill="#fff">
+                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                  </svg>
+                                  <span>Klik untuk memperbesar</span>
+                                </div>
+                              </div>
+                              <button 
+                                className="btn-delete-image" 
                                 type="button"
-                                onClick={() => setActiveImageIndex(idx)}
-                                aria-label={`Ke foto ${idx + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteImage(img.slot);
+                                }}
+                                title="Hapus gambar ini"
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        {imageSources.length > 1 && (
+                          <>
+                            <button className="slider-arrow prev" type="button" onClick={handlePrevImage} aria-label="Foto sebelumnya">‹</button>
+                            <button className="slider-arrow next" type="button" onClick={handleNextImage} aria-label="Foto berikutnya">›</button>
+                            <div className="slider-dots">
+                              {imageSources.map((img, idx) => (
+                                <button
+                                  key={img.slot}
+                                  className={`slider-dot ${activeImageIndex === idx ? 'active' : ''}`}
+                                  type="button"
+                                  onClick={() => setActiveImageIndex(idx)}
+                                  aria-label={`Ke foto ${idx + 1}`}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="detail-actions">
                   <button
-                    className="btn-next"
+                    className={`btn-next ${allReports && allReports.length > 1 ? '' : 'is-hidden'}`}
                     type="button"
                     onClick={() => {
-                      if (!allReports || allReports.length === 0) return;
+                      if (!allReports || allReports.length <= 1) return;
                       const idx = allReports.findIndex(r => r.id === id);
                       if (idx !== -1) {
                         const nextIdx = (idx < allReports.length - 1) ? idx + 1 : 0;
                         navigate(`/teknisi/laporan/${allReports[nextIdx].id}`);
                       }
                     }}
-                    disabled={!allReports || allReports.length === 0}
+                    disabled={!allReports || allReports.length <= 1}
+                    aria-hidden={!allReports || allReports.length <= 1}
+                    tabIndex={!allReports || allReports.length <= 1 ? -1 : 0}
                   >
                     Berikutnya →
                   </button>
@@ -349,8 +471,7 @@ export default function TeknisiLaporanDetail() {
                     <input 
                       type="file" 
                       accept="image/*" 
-                      multiple 
-                      onChange={handleFileChange}
+                      onChange={handleReplaceImageChange}
                       style={{ display: 'none' }}
                       id="upload-input"
                       disabled={uploading}
@@ -422,15 +543,19 @@ export default function TeknisiLaporanDetail() {
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
-            <img src={imageSources[activeImageIndex] || 'https://via.placeholder.com/400x500.png?text=Foto'} alt="Lampiran Besar" />
+            {imageSources.length === 0 ? (
+              <div style={{ color: '#777', padding: '24px', textAlign: 'center' }}>Tidak ada foto</div>
+            ) : (
+              <img src={imageSources[activeImageIndex]?.src} alt="Lampiran Besar" />
+            )}
             {imageSources.length > 1 && (
               <>
                 <button className="image-modal-arrow prev" onClick={handlePrevImage} aria-label="Sebelumnya">‹</button>
                 <button className="image-modal-arrow next" onClick={handleNextImage} aria-label="Berikutnya">›</button>
                 <div className="image-modal-dots">
-                  {imageSources.map((_, idx) => (
+                  {imageSources.map((img, idx) => (
                     <button
-                      key={idx}
+                      key={img.slot}
                       className={`image-modal-dot ${idx === activeImageIndex ? 'active' : ''}`}
                       onClick={() => setActiveImageIndex(idx)}
                       aria-label={`Pilih gambar ${idx + 1}`}

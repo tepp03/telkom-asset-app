@@ -26,53 +26,19 @@ function PelaporDaftarLaporan() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  
-  // Block all browser navigation (back/forward)
+  // Custom back: jika user tekan back dari daftar laporan, langsung ke form laporan tanpa melewati page lain
   useEffect(() => {
-    // Prevent navigation by keeping history at single state
-    const blockNavigation = () => {
-      window.history.pushState(null, document.title, window.location.href);
-    };
-    
-    // Block on mount
-    blockNavigation();
-    
-    // Block on any popstate event
-    const handlePopState = () => {
-      blockNavigation();
-    };
-    
-    // Block keyboard shortcuts
-    const handleKeyDown = (e) => {
-      // Alt+Left (back), Alt+Right (forward), Backspace (back in some browsers)
-      if ((e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) ||
-          (e.key === 'Backspace' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA')) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
+    // Ganti state history agar daftar-laporan jadi root, tidak ada page penghalang
+    window.history.replaceState({ daftarLaporan: true }, '', window.location.href);
+    const handlePopState = (e) => {
+      // Selalu arahkan ke form laporan jika user tekan back dari daftar laporan
+      if (window.location.pathname === '/pelapor/daftar-laporan') {
+        navigate('/pelapor/form-laporan', { replace: true });
       }
     };
-    
-    // Block mouse navigation buttons
-    const handleMouseButton = (e) => {
-      // Mouse button 3 (back) or 4 (forward)
-      if (e.button === 3 || e.button === 4) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    };
-    
     window.addEventListener('popstate', handlePopState);
-    document.addEventListener('keydown', handleKeyDown, true);
-    document.addEventListener('mouseup', handleMouseButton, true);
-    
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-      document.removeEventListener('keydown', handleKeyDown, true);
-      document.removeEventListener('mouseup', handleMouseButton, true);
-    };
-  }, []);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [navigate]);
 
   useEffect(() => {
     document.title = 'Daftar Laporan | Pelapor';
@@ -175,7 +141,7 @@ function PelaporDaftarLaporan() {
       {/* Floating Action Button */}
       <button
         className="fab-add-report"
-        onClick={() => navigate('/pelapor/inbox')}
+        onClick={() => navigate('/pelapor/form-laporan')}
         title="Buat Laporan Baru"
         type="button"
       >

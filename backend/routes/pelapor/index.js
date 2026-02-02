@@ -1,7 +1,4 @@
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const router = express.Router();
 const { authenticateToken, requirePelapor } = require('../../middleware/auth');
 const apiLimiter = require('../../middleware/rateLimiter').apiLimiter;
@@ -16,19 +13,8 @@ const pelaporLimiter = rateLimit({
   }
 });
 
-// Storage untuk upload foto laporan
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, '../../data/uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
-  }
-});
-const upload = multer({ storage });
+// Import Cloudinary upload
+const { upload } = require('../../config/cloudinary');
 
 const { openDb } = require('../../db');
 
@@ -45,19 +31,20 @@ async function generateReportId(unit) {
   const db = openDb();
   const code = unitCodeMap[unit] || 'LR'; // Default LR jika unit tidak dikenali
   
-  // Hitung laporan dengan kode yang sama untuk mendapat nomor urut
+  // Ambil nomor urut terbesar agar tidak bentrok saat ada data yang terhapus
   const result = await new Promise((resolve, reject) => {
+    const startIndex = code.length + 2; // 1-based index setelah "CODE-"
     db.get(
-      'SELECT COUNT(*) as count FROM reports WHERE id LIKE ?',
-      [`${code}-%`],
+      'SELECT MAX(CAST(SUBSTR(id, ?) AS INTEGER)) as maxNum FROM reports WHERE id LIKE ?',
+      [startIndex, `${code}-%`],
       (err, row) => {
         if (err) return reject(err);
-        resolve(row ? row.count : 0);
+        resolve(row ? row.maxNum : 0);
       }
     );
   });
   
-  const nextNumber = result + 1;
+  const nextNumber = (Number(result) || 0) + 1;
   const paddedNumber = String(nextNumber).padStart(3, '0');
   return `${code}-${paddedNumber}`;
 }
@@ -69,7 +56,8 @@ router.post('/laporan', authenticateToken, requirePelapor, pelaporLimiter, uploa
   const unit = req.user.unit;
   
   const files = req.files || [];
-  const fotoUrls = files.map(f => '/uploads/' + f.filename);
+  // Cloudinary returns file.path as secure URL
+  const fotoUrls = files.map(f => f.path);
   // Pastikan minimal 1 foto, maksimal 3
   if (!nama || !tanggal || !aset || !deskripsi || fotoUrls.length === 0) {
     return res.status(400).json({ error: 'Semua field wajib diisi dan minimal 1 foto' });
@@ -108,8 +96,13 @@ router.get('/laporan', authenticateToken, requirePelapor, async (req, res) => {
       unit: r.unit,
       tanggal: r.tanggal,
       aset: r.nama_barang,
+      nama_barang: r.nama_barang,
+      email_pelapor: r.email_pelapor,
       deskripsi: r.deskripsi,
-      foto: (r.image_url || '').replace(/^\/api\/uploads\//, '/uploads/'),
+      foto: r.image_url,
+      image_url: r.image_url,
+      image_url2: r.image_url2,
+      image_url3: r.image_url3,
       status: r.status || 'Pending'
     }));
     res.json(mapped);

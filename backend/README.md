@@ -17,18 +17,6 @@ npm start
 
 Server akan jalan di `http://localhost:4000`
 
-## Default Credentials (Development)
-
-**Admin:**
-- Username: `admin`
-- Password: `admin123`
-
-**Teknisi:**
-- Username: `teknisi`
-- Password: `TelkomTeknisi2026!`
-
-⚠️ **WAJIB GANTI PASSWORD INI DI PRODUCTION!**
-
 ## API Endpoints
 
 ### Public Endpoints
@@ -42,9 +30,6 @@ Server akan jalan di `http://localhost:4000`
 - `PUT /api/reports/:id/status` - Update report status (Admin/Teknisi)
 - `DELETE /api/reports/:id` - Delete report (Admin/Teknisi)
 - `GET /api/dashboard/summary` - Dashboard statistics
-- `GET /api/users` - List users (Admin only)
-- `POST /api/users` - Create user (Admin only)
-- `DELETE /api/users/:id` - Delete user (Admin only)
 
 ## Security Features
 
@@ -63,7 +48,7 @@ Server akan jalan di `http://localhost:4000`
 ```bash
 curl -X POST http://localhost:4000/api/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"TelkomAdmin2026!"}'
+  -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}'
 ```
 
 ### Test Protected Route
@@ -93,7 +78,6 @@ Tables:
 - `admins` - Admin users
 - `teknisi` - Teknisi users  
 - `reports` - Asset reports
-- `users` - General users
 
 ⚠️ **Note:** SQLite sudah cukup untuk development. Untuk production dengan concurrent access tinggi, pertimbangkan PostgreSQL/MySQL.
 
