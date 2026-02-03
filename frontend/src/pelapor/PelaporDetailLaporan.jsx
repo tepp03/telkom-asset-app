@@ -72,6 +72,9 @@ export default function PelaporDetailLaporan() {
   const [allReports, setAllReports] = useState([]);
   const [similarReports, setSimilarReports] = useState([]);
   const [imageModal, setImageModal] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  
   // Tombol berikutnya: urutan sesuai allReports
   const currentIndex = allReports.findIndex(r => r.id === id);
   const nextId = currentIndex >= 0 && currentIndex < allReports.length - 1 ? allReports[currentIndex + 1].id : (allReports.length > 0 ? allReports[0].id : null);
@@ -150,6 +153,26 @@ export default function PelaporDetailLaporan() {
   const handlePrevImage = () => setActiveImageIndex((prev) => (prev === 0 ? imageSources.length - 1 : prev - 1));
   const handleNextImage = () => setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
 
+  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
+  
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    const distance = touchStart - e.changedTouches[0].clientX;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) handleNextImage();
+    if (isRightSwipe) handlePrevImage();
+  };
+
+  useEffect(() => {
+    if (imageSources.length < 2) return undefined;
+    const intervalId = setInterval(() => {
+      setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(intervalId);
+  }, [imageSources.length]);
+
   return (
     <div className="detail-page">
       <Navbar />
@@ -203,6 +226,8 @@ export default function PelaporDetailLaporan() {
                         <div
                           className="image-track"
                           style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={handleTouchEnd}
                         >
                           {imageSources.map((src, idx) => (
                             <div className="image-slide" key={idx} onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}>
@@ -240,18 +265,6 @@ export default function PelaporDetailLaporan() {
                   </div>
                 </div>
                 <div className="detail-actions">
-                  {allReports.length > 1 && (
-                    <button
-                      className="btn-next"
-                      type="button"
-                      onClick={() => {
-                        if (nextId && nextId !== id) navigate(`/pelapor/laporan/${nextId}`);
-                        else if (allReports.length > 1) navigate(`/pelapor/laporan/${allReports[0].id}`);
-                      }}
-                    >
-                      Berikutnya &rarr;
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
@@ -310,7 +323,12 @@ export default function PelaporDetailLaporan() {
             {imageSources.length === 0 ? (
               <div style={{ color: '#777', padding: '24px', textAlign: 'center' }}>Tidak ada foto</div>
             ) : (
-              <img src={imageSources[activeImageIndex]} alt="Lampiran Besar" />
+              <img 
+                src={imageSources[activeImageIndex]} 
+                alt="Lampiran Besar"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              />
             )}
             {imageSources.length > 1 && (
               <>

@@ -95,3 +95,78 @@
   max-width: 320px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
+/* Mobile Responsive - Layout Only */
+@media (max-width: 768px) {
+  .pelapor-detail-main {
+    padding: 16px 12px;
+  }
+
+  .pelapor-detail-title-row {
+    display: none;
+  }
+
+  .pelapor-detail-card {
+    overflow: visible;
+  }
+
+  .pelapor-detail-header {
+    padding: 16px;
+    flex-direction: row;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pelapor-detail-content {
+    padding: 80px 40px;
+    gap: 20px;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .info-label {
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-size: 12px;
+  }
+
+  .slider-arrow {
+    display: none;
+  }
+
+  .slider-dots {
+    display: none;
+  }
+
+  .image-track {
+    touch-action: pan-y;
+  }
+
+  .image-modal-arrow {
+    display: none;
+  }
+
+  .image-modal-dots {
+    display: none;
+  }
+
+  .image-modal-content img {
+    touch-action: pan-y;
+  }
+
+  .detail-image img {
+    max-width: 220px !important;
+    width: 220px !important;
+    height: 220px !important;
+    object-fit: contain;
+    display: block;
+    margin-bottom: 60px;
+  }
+}

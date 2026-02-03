@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './PelaporLaporanForm.css';
 import './NotificationGlass.css';
 import './FabMenu.css';
@@ -89,6 +89,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   const [popupFade, setPopupFade] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const dateInputRef = useRef(null);
 
   // Custom calendar helpers
   const getDaysInMonth = (date) => {
@@ -121,6 +122,11 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     const newDate = new Date(currentMonth);
     newDate.setMonth(currentMonth.getMonth() + direction);
     setCurrentMonth(newDate);
+  };
+
+  // Toggle calendar
+  const handleCalendarToggle = () => {
+    setShowCalendar(!showCalendar);
   };
 
   const handleChange = e => {
@@ -280,7 +286,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
         <div className="form-group tanggal">
           <label htmlFor="tanggal">Tanggal Kejadian</label>
           <div className="custom-date-picker">
-            <div className="date-input-display" onClick={() => setShowCalendar(!showCalendar)}>
+            <div className="date-input-display" ref={dateInputRef} onClick={handleCalendarToggle}>
               <span>{formatDisplayDate(form.tanggal)}</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -290,43 +296,46 @@ const PelaporLaporanForm = ({ onSuccess }) => {
               </svg>
             </div>
             {showCalendar && (
-              <div className="calendar-popup">
-                <div className="calendar-header">
-                  <button type="button" onClick={() => changeMonth(-1)}>‹</button>
-                  <span>{currentMonth.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
-                  <button type="button" onClick={() => changeMonth(1)}>›</button>
+              <>
+                <div className="calendar-backdrop" onClick={() => setShowCalendar(false)}></div>
+                <div className="calendar-popup">
+                  <div className="calendar-header">
+                    <button type="button" onClick={() => changeMonth(-1)}>‹</button>
+                    <span>{currentMonth.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
+                    <button type="button" onClick={() => changeMonth(1)}>›</button>
+                  </div>
+                  <div className="calendar-weekdays">
+                    {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
+                      <div key={day} className="weekday">{day}</div>
+                    ))}
+                  </div>
+                  <div className="calendar-days">
+                    {(() => {
+                      const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
+                      const days = [];
+                      for (let i = 0; i < startingDayOfWeek; i++) {
+                        days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+                      }
+                      for (let day = 1; day <= daysInMonth; day++) {
+                        const isToday = day === new Date().getDate() && 
+                                        currentMonth.getMonth() === new Date().getMonth() &&
+                                        currentMonth.getFullYear() === new Date().getFullYear();
+                        const isSelected = form.tanggal === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                        days.push(
+                          <div 
+                            key={day} 
+                            className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                            onClick={() => selectDate(day)}
+                          >
+                            {day}
+                          </div>
+                        );
+                      }
+                      return days;
+                    })()}
+                  </div>
                 </div>
-                <div className="calendar-weekdays">
-                  {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
-                    <div key={day} className="weekday">{day}</div>
-                  ))}
-                </div>
-                <div className="calendar-days">
-                  {(() => {
-                    const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
-                    const days = [];
-                    for (let i = 0; i < startingDayOfWeek; i++) {
-                      days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
-                    }
-                    for (let day = 1; day <= daysInMonth; day++) {
-                      const isToday = day === new Date().getDate() && 
-                                      currentMonth.getMonth() === new Date().getMonth() &&
-                                      currentMonth.getFullYear() === new Date().getFullYear();
-                      const isSelected = form.tanggal === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                      days.push(
-                        <div 
-                          key={day} 
-                          className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
-                          onClick={() => selectDate(day)}
-                        >
-                          {day}
-                        </div>
-                      );
-                    }
-                    return days;
-                  })()}
-                </div>
-              </div>
+              </>
             )}
           </div>
           {fieldErrors.tanggal && <div className="field-note">{fieldErrors.tanggal}</div>}

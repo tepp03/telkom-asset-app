@@ -88,11 +88,14 @@ export default function TeknisiLaporanDetail() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [isPickingUpload, setIsPickingUpload] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [allReports, setAllReports] = useState([]);
   const [similarReports, setSimilarReports] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', action: null });
   const [imageModal, setImageModal] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Set judul tab browser sesuai format
   useEffect(() => {
@@ -173,7 +176,29 @@ export default function TeknisiLaporanDetail() {
     }
   }, [imageSources.length, activeImageIndex]);
 
+  useEffect(() => {
+    if (imageSources.length < 2) return undefined;
+    if (uploading || modal.isOpen || isPickingUpload) return undefined;
+    const intervalId = setInterval(() => {
+      setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(intervalId);
+  }, [imageSources.length, uploading, modal.isOpen, isPickingUpload]);
+
+  const handleOpenUploadPicker = () => {
+    if (uploading) return;
+    setIsPickingUpload(true);
+    const handleFocus = () => {
+      setIsPickingUpload(false);
+      window.removeEventListener('focus', handleFocus);
+    };
+    window.addEventListener('focus', handleFocus);
+    const input = document.getElementById('upload-input');
+    if (input) input.click();
+  };
+
   const handleReplaceImageChange = async (e) => {
+    setIsPickingUpload(false);
     const files = Array.from(e.target.files || []);
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -244,7 +269,7 @@ export default function TeknisiLaporanDetail() {
             return;
           }
 
-          const res = await fetch(`http://localhost:4001/api/teknisi/reports/${id}/images/${slot}`, {
+          const res = await fetch(`/api/teknisi/reports/${id}/images/${slot}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -333,12 +358,21 @@ export default function TeknisiLaporanDetail() {
     setActiveImageIndex(prev => (prev === imageSources.length - 1 ? 0 : prev + 1));
   };
 
+  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
+  
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    const distance = touchStart - e.changedTouches[0].clientX;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) handleNextImage();
+    if (isRightSwipe) handlePrevImage();
+  };
+
   return (
     <div className="detail-page">
       <Navbar />
-      {error && (
-        <div style={{ textAlign: 'center', color: '#b00000', padding: '16px' }}>{error}</div>
-      )}
       <div className="detail-main">
         <h1 className="detail-title">Detail Laporan</h1>
         {!report ? (
@@ -390,10 +424,16 @@ export default function TeknisiLaporanDetail() {
                         <div
                           className="image-track"
                           style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={handleTouchEnd}
                         >
                           {imageSources.map((img, idx) => (
-                            <div className="image-slide" key={img.slot} onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}>
-                              <div className="image-wrapper">
+                            <div className="image-slide" key={img.slot}>
+                              <div 
+                                className="image-wrapper"
+                                onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}
+                                style={{ position: 'relative' }}
+                              >
                                 <img src={img.src} alt={`Lampiran ${idx + 1}`} />
                                 <div className="image-overlay">
                                   <svg width="48" height="48" viewBox="0 0 24 24" fill="#fff">
@@ -401,20 +441,20 @@ export default function TeknisiLaporanDetail() {
                                   </svg>
                                   <span>Klik untuk memperbesar</span>
                                 </div>
+                                <button 
+                                  className="btn-delete-image" 
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteImage(img.slot);
+                                  }}
+                                  title="Hapus gambar ini"
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                  </svg>
+                                </button>
                               </div>
-                              <button 
-                                className="btn-delete-image" 
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteImage(img.slot);
-                                }}
-                                title="Hapus gambar ini"
-                              >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                </svg>
-                              </button>
                             </div>
                           ))}
                         </div>
@@ -441,23 +481,6 @@ export default function TeknisiLaporanDetail() {
                 </div>
 
                 <div className="detail-actions">
-                  <button
-                    className={`btn-next ${allReports && allReports.length > 1 ? '' : 'is-hidden'}`}
-                    type="button"
-                    onClick={() => {
-                      if (!allReports || allReports.length <= 1) return;
-                      const idx = allReports.findIndex(r => r.id === id);
-                      if (idx !== -1) {
-                        const nextIdx = (idx < allReports.length - 1) ? idx + 1 : 0;
-                        navigate(`/teknisi/laporan/${allReports[nextIdx].id}`);
-                      }
-                    }}
-                    disabled={!allReports || allReports.length <= 1}
-                    aria-hidden={!allReports || allReports.length <= 1}
-                    tabIndex={!allReports || allReports.length <= 1 ? -1 : 0}
-                  >
-                    Berikutnya →
-                  </button>
                   <div className="action-buttons">
                     <button 
                       className={`btn-cycle ${getNextStatusClass(report?.status)}`}
@@ -476,14 +499,16 @@ export default function TeknisiLaporanDetail() {
                       id="upload-input"
                       disabled={uploading}
                     />
-                    <button 
+                    <button
                       type="button"
                       className="btn-upload"
-                      onClick={() => document.getElementById('upload-input').click()}
+                      onClick={handleOpenUploadPicker}
                       disabled={uploading}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="13" r="4"/>
+                        <path d="M5.5 7h13l-1.38-2.76A2 2 0 0 0 15.03 3H8.97a2 2 0 0 0-1.79 1.24L5.5 7z"/>
+                        <rect x="3" y="7" width="18" height="13" rx="2"/>
                       </svg>
                       {uploading ? 'Mengunggah…' : 'Unggah Gambar'}
                     </button>
@@ -546,7 +571,12 @@ export default function TeknisiLaporanDetail() {
             {imageSources.length === 0 ? (
               <div style={{ color: '#777', padding: '24px', textAlign: 'center' }}>Tidak ada foto</div>
             ) : (
-              <img src={imageSources[activeImageIndex]?.src} alt="Lampiran Besar" />
+              <img 
+                src={imageSources[activeImageIndex]?.src} 
+                alt="Lampiran Besar"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              />
             )}
             {imageSources.length > 1 && (
               <>

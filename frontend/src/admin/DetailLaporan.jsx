@@ -103,6 +103,8 @@ function DetailLaporan() {
   const [allReports, setAllReports] = useState([]);
   const [similarReports, setSimilarReports] = useState([]);
   const [error, setError] = useState('');
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   useEffect(() => {
     setActiveImageIndex(0);
@@ -296,6 +298,26 @@ function DetailLaporan() {
     setActiveImageIndex(prev => (prev === imageSources.length - 1 ? 0 : prev + 1));
   };
 
+  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
+  
+  const handleTouchEnd = (e) => {
+    setTouchEnd(e.changedTouches[0].clientX);
+    const distance = touchStart - e.changedTouches[0].clientX;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) handleNextImage();
+    if (isRightSwipe) handlePrevImage();
+  };
+
+  useEffect(() => {
+    if (imageSources.length < 2) return undefined;
+    const intervalId = setInterval(() => {
+      setActiveImageIndex((prev) => (prev === imageSources.length - 1 ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(intervalId);
+  }, [imageSources.length]);
+
   const handleDelete = () => {
     setModal({
       isOpen: true,
@@ -409,6 +431,8 @@ function DetailLaporan() {
                     <div
                       className="image-track"
                       style={{ transform: `translateX(-${activeImageIndex * 100}%)` }}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
                     >
                       {imageSources.map((src, idx) => (
                         <div className="image-slide" key={idx} onClick={() => { setActiveImageIndex(idx); setImageModal(true); }}>
@@ -450,23 +474,6 @@ function DetailLaporan() {
             </div>
 
             <div className="detail-actions">
-              <button
-                className={`btn-next ${allIds && allIds.length > 1 ? '' : 'is-hidden'}`}
-                type="button"
-                onClick={() => {
-                  if (!allIds || allIds.length <= 1) return;
-                  const idx = allIds.findIndex(rid => rid === id);
-                  if (idx !== -1) {
-                    const nextIdx = (idx < allIds.length - 1) ? idx + 1 : 0;
-                    navigate(`/laporan/${allIds[nextIdx]}`);
-                  }
-                }}
-                disabled={!allIds || allIds.length <= 1}
-                aria-hidden={!allIds || allIds.length <= 1}
-                tabIndex={!allIds || allIds.length <= 1 ? -1 : 0}
-              >
-                Berikutnya →
-              </button>
               <div className="action-buttons">
                 <button 
                   className={`btn-cycle ${getNextStatusClass(report?.status)}`}
@@ -542,7 +549,12 @@ function DetailLaporan() {
             {imageSources.length === 0 ? (
               <div style={{ color: '#777', padding: '24px', textAlign: 'center' }}>Tidak ada foto</div>
             ) : (
-              <img src={imageSources[activeImageIndex]} alt="Lampiran Besar" />
+              <img 
+                src={imageSources[activeImageIndex]} 
+                alt="Lampiran Besar"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              />
             )}
             {imageSources.length > 1 && (
               <>
