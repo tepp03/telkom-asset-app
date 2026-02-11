@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../shared/components/Navbar';
 import './TeknisiLaporanAset.css';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const statusMap = {
   'Pending': 'To-Do',
   'Dalam Proses': 'Processed',
@@ -33,7 +36,7 @@ function useTeknisiReports(searchTerm, navigate) {
           navigate('/login');
           return;
         }
-        const url = searchTerm ? `/api/teknisi/reports?search=${encodeURIComponent(searchTerm)}` : '/api/teknisi/reports';
+        const url = searchTerm ? `${API_URL}/api/teknisi/reports?search=${encodeURIComponent(searchTerm)}` : `${API_URL}/api/teknisi/reports`;
         const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.status === 401) {
           localStorage.clear();

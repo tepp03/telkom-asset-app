@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import ConfirmModal from './ConfirmModal';
 import logoTelkom from '../assets/telkom-logo2.png';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 
 function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange }) {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
@@ -44,7 +47,7 @@ function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange
     }
     const token = localStorage.getItem('token');
     if (!token) return;
-    fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_URL}/api/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => {
         const role = data?.user?.role;

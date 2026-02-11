@@ -5,6 +5,9 @@ import './LaporanAset.css';
 import { useEffect, useState } from 'react';
 import { useEffect as useEffectTitle } from 'react';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 function useSetAdminListTitle() {
   useEffectTitle(() => {
     document.title = 'Daftar Laporan Aset | Admin';
@@ -42,7 +45,7 @@ function useReports(searchTerm) {
           window.location.href = '/login';
           return;
         }
-        const url = searchTerm ? `/api/reports?search=${encodeURIComponent(searchTerm)}` : '/api/reports';
+        const url = searchTerm ? `${API_URL}/api/reports?search=${encodeURIComponent(searchTerm)}` : `${API_URL}/api/reports`;
         const res = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`

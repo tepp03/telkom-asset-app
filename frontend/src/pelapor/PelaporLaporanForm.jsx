@@ -5,6 +5,9 @@ import './FabMenu.css';
 import Navbar from '../shared/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const WA_ADMIN = '6285195003001'; // Nomor: 0851-9500-3001
 const WA_MESSAGE = encodeURIComponent('Halo Admin, saya ingin bertanya tentang laporan pengaduan.');
 
@@ -198,7 +201,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
     });
     
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/pelapor/laporan', {
+    const res = await fetch(`${API_URL}/api/pelapor/laporan`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -225,7 +228,7 @@ const PelaporLaporanForm = ({ onSuccess }) => {
   const fetchLaporan = async () => {
     setLoadingInbox(true);
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/pelapor/laporan', {
+    const res = await fetch(`${API_URL}/api/pelapor/laporan`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

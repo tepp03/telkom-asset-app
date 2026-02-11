@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import TelkomLogo from './components/TelkomLogo';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 // Komponen Login
 function Login({ setAuth, setRole }) {
     // Set judul
@@ -75,7 +78,7 @@ function Login({ setAuth, setRole }) {
                   setLoading(true);
                   try {
                     // Login via backend (admin/teknisi/pelapor)
-                    const res = await fetch('/api/login', {
+                    const res = await fetch(`${API_URL}/api/login`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ username, password })

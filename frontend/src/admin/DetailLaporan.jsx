@@ -4,6 +4,9 @@ import './DetailLaporan.css';
 import { useEffect, useState } from 'react';
 import ConfirmModal from '../shared/components/ConfirmModal';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const statusMap = {
   'Pending': 'To-Do',
   'Dalam Proses': 'Processed',
@@ -162,7 +165,7 @@ function DetailLaporan() {
           window.location.href = '/login';
           return;
         }
-        const res = await fetch('/api/reports', {
+        const res = await fetch(`${API_URL}/api/reports`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -268,7 +271,7 @@ function DetailLaporan() {
           setReport({ ...report, status: flow.db });
 
           // Refresh allReports dan similarReports agar status laporan serupa ikut update
-          const reportsRes = await fetch('/api/reports', {
+          const reportsRes = await fetch(`${API_URL}/api/reports`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (reportsRes.ok) {

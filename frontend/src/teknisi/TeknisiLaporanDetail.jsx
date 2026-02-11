@@ -4,6 +4,9 @@ import Navbar from '../shared/components/Navbar';
 import ConfirmModal from '../shared/components/ConfirmModal';
 import './TeknisiLaporanDetail.css';
 
+// API URL dari environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 const statusMap = {
   'Pending': 'To-Do',
   'Dalam Proses': 'Processed',
@@ -141,7 +144,7 @@ export default function TeknisiLaporanDetail() {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const res = await fetch('/api/teknisi/reports', { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`${API_URL}/api/teknisi/reports`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.status === 401) {
           localStorage.clear();
           navigate('/login');
