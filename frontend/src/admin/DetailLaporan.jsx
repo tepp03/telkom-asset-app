@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import ConfirmModal from '../shared/components/ConfirmModal';
 
 // API URL dari environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
 
 const statusMap = {
   'Pending': 'To-Do',

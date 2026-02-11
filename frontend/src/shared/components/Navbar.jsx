@@ -5,7 +5,7 @@ import ConfirmModal from './ConfirmModal';
 import logoTelkom from '../assets/telkom-logo2.png';
 
 // API URL dari environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
 
 
 function Navbar({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange }) {

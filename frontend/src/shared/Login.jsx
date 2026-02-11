@@ -5,7 +5,7 @@ import './Login.css';
 import TelkomLogo from './components/TelkomLogo';
 
 // API URL dari environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
 
 // Komponen Login
 function Login({ setAuth, setRole }) {

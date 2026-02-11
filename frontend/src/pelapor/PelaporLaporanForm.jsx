@@ -6,7 +6,7 @@ import Navbar from '../shared/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 // API URL dari environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
 
 const WA_ADMIN = '6285195003001'; // Nomor: 0851-9500-3001
 const WA_MESSAGE = encodeURIComponent('Halo Admin, saya ingin bertanya tentang laporan pengaduan.');

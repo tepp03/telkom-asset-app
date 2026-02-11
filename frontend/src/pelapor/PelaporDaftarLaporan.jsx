@@ -4,7 +4,7 @@ import '../admin/LaporanAset.css';
 import { useNavigate } from 'react-router-dom';
 
 // API URL dari environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
 
 const statusMap = {
   'Pending': 'To-Do',

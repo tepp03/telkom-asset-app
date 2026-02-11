@@ -5,7 +5,7 @@ import ConfirmModal from '../shared/components/ConfirmModal';
 import './TeknisiLaporanDetail.css';
 
 // API URL dari environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
 
 const statusMap = {
   'Pending': 'To-Do',
